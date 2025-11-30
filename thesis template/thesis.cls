@@ -174,19 +174,18 @@
     \end{singlespacing}
     \vfill
     \@firstname~\@lastname\\ \vfill
-    \textbf{A THESIS}\\ \vfill
-    Presented to the Faculty of Miami University in partial\\
-    fulfillment of the requirements\\
-    for the degree of\\ \vfill
-    Master of Science\\ \vfill
-    Department of~\@department\\ \vfill
-    The Graduate School\\
+    % \textbf{A THESIS}\\ \vfill
+    % Presented to the Faculty of Miami University in partial\\
+    % fulfillment of the requirements\\
+    % for the degree of\\ \vfill
+    % Master of Science\\ \vfill
+    % Department of~\@department\\ \vfill
+    % The Graduate School\\
     \@school\\
     \@city, \@state\\ \vfill
     \@year\\ \vfill\vfill
     \begin{flushleft}
-      \renewcommand{\do}[1]{##1, Advisor\\}{\dolistloop\advisors}
-      \renewcommand{\do}[1]{##1, Reader\\}{\dolistloop\committee}
+      Dr. Van Scoy, Professor
     \end{flushleft}
     % copyright page
     \newpage
