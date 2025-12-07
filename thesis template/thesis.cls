@@ -173,27 +173,27 @@
       \MakeUppercase{\@title}
     \end{singlespacing}
     \vfill
-    \@firstname~\@lastname\\ \vfill
-    % \textbf{A THESIS}\\ \vfill
-    % Presented to the Faculty of Miami University in partial\\
-    % fulfillment of the requirements\\
-    % for the degree of\\ \vfill
-    % Master of Science\\ \vfill
-    % Department of~\@department\\ \vfill
-    % The Graduate School\\
+    \begin{figure}[h!]
+      \centering
+      \includegraphics[width=0.6\linewidth]{unicycle_patent.jpg}
+      \caption{Patent 3,083,036\cite{unicycle_self_powered}}
+      \label{fig:patent_unicycle}
+    \end{figure}
     \@school\\
-    \@city, \@state\\ \vfill
+    \@city, \@state\\ 
     \@year\\ \vfill\vfill
     \begin{flushleft}
+      \@firstname~\@lastname, Author\\
+      
       Dr. Van Scoy, Professor
     \end{flushleft}
-    % copyright page
-    \newpage
-    \vspace*{6cm}
-    \thispagestyle{empty}
-    \copyright\\[1cm]
-    \@firstname~\@lastname\\[1cm]
-    \@year
+    % % copyright page
+    % \newpage
+    % \vspace*{6cm}
+    % \thispagestyle{empty}
+    % \copyright\\[1cm]
+    % \@firstname~\@lastname\\[1cm]
+    % \@year
     \newpage
   \end{titlepage}
   \myspacing}

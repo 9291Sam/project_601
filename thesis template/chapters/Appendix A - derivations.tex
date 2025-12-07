@@ -1,0 +1,46 @@
+\chapter{Appendix A - Derivations}
+
+\paragraph{Derivation of $d_c$ for $\phi$} \label{par:d_c derivation}
+
+Looking at Figure \ref{fig:derivation_com}, $x$ is the distance from the base to
+the center of mass, the variables in the drawing perfectly correspond to those
+used in the derivation of $\phi$. By balancing moments, with respect to x, we
+arrive at the equation $(x-r)m_w = (r+d-x)m_r$ and, by solving for x, we arrive
+at
+$$ x = \frac{m_rr + dm_r + m_wr}{m_w+m_r}$$
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.525\linewidth]{center_of_mass.png}
+  \caption{Drawing of a Unicycle's center of mass points}
+  \label{fig:derivation_com}
+\end{figure}
+
+
+
+\paragraph{Deivation of $F_c$ for $\phi$} \label{par:F_c derivation}
+
+As a reminder, $F_c$ is the centrifugal force acting upon the entire unicycle
+at the center of mass \textbf{parallel to the global y axis}. to the frame of
+the unicycle. Starting off with Newton's third law, $F = ma$, we see that in
+order to calculate this, we need the total mass of the system, $m_c = m_w + m_r$
+and the centrifugal acceleration. The formula for centrifugal acceleration is 
+$a_c = \frac{v^2}{r}$ where v is the velocity in the direction of travel and $r$
+is the radius swept by the rotation. Thankfully, both of these correspond to
+formulas previously derived. $v=r_t\dot{\theta}$ restated as
+$r_t = \frac{v}{\dot{\theta}}$ and $v = r_w\omega$.
+Combing these together we arrive at
+$a_c = \frac{v^2}{v / \dot{\theta}} = v\dot{\theta} = r_w\omega\dot{\theta}$.
+Finally, this can be substituted into Newton's third law to achieve
+$$F_c = r_w\omega m_c \dot{\theta}$$
+
+\paragraph{Derivation of gyroscopic effect} \label{par:t_g derivation}
+
+The angular momentum of a spinning wheel is $L = I_w*\omega$ keeping with the 
+conventions of this document, that means $L = I_{wy}\omega$. Additionally, 
+newton's second law for rotation states that $\tau = \dot{L}$ By the small
+angle approximation, we can approximate $\dot{L} = L\dot{\theta}$ and with this
+we arrive at the formula $\tau_g = I_w\omega\dot{\theta}$. Finally, remember
+that this torque must act opposite as a restoring force, as it is currently
+written as a positive feedback loop.
+$$\tau_g = -I_w\omega\dot{\theta}$$

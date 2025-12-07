@@ -51,11 +51,12 @@ pathRadius = 6.0;
 % wheel roll            | φ
 % shaft lean            | α
 
+
 while ishandle(f)
     x = pathRadius * cos(t);
     y = pathRadius * sin(t);
     theta = t + (pi/2); % tangent to a circle
-    phi = 0.3;
+    phi = -0.3;
     Omega = -(pathRadius * t) / wheel_radius;
     alpha = -0.3;
     

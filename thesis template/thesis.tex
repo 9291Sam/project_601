@@ -130,54 +130,56 @@
 
 % the title page is the first numbered page (not the abstract),
 % but the first page number appears on the abstract
-\setcounter{page}{3}
+\setcounter{page}{2}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% ABSTRACT (200 word max, one paragraph)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{abstract}
+% \begin{abstract}
   
-  This document is a template and guide for writing a thesis in \LaTeX. The document is divided into sections explaining the preferred way of typesetting equations, figures, tables, and more. To prepare your thesis, simply edit the file \texttt{thesis.tex} along with the chapters in the \texttt{chapter/} folder. To make the final pdf, open a command prompt, navigate to the folder containing the template, and run the following commands:
+%   This document is a template and guide for writing a thesis in \LaTeX. The document is divided into sections explaining the preferred way of typesetting equations, figures, tables, and more. To prepare your thesis, simply edit the file \texttt{thesis.tex} along with the chapters in the \texttt{chapter/} folder. To make the final pdf, open a command prompt, navigate to the folder containing the template, and run the following commands:
   
-  \texttt{pdflatex thesis.tex}\\
-  \texttt{bibtex thesis.aux}\\
-  \texttt{pdflatex thesis.tex}\\
-  \texttt{pdflatex thesis.tex}
-\end{abstract}
+%   \texttt{pdflatex thesis.tex}\\
+%   \texttt{bibtex thesis.aux}\\
+%   \texttt{pdflatex thesis.tex}\\
+%   \texttt{pdflatex thesis.tex}
+% \end{abstract}
 
 % table of contents
 \tableofcontents
 
 % list of tables
-\lot
+% \lot
 
 % list of figures
-\lof
+% \lof
 
 % dedication (optional)
-\input{chapters/dedication}
+% \input{chapters/dedication}
 
-% acknowledgements (optional)
-\input{chapters/acknowledgements}
+% % acknowledgements (optional)
+% \input{chapters/acknowledgements}
 
-% acronyms (optional)
-\input{chapters/acronyms}
+% % acronyms (optional)
+% \input{chapters/acronyms}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% CHAPTERS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \mainmatter
-\input{chapters/1 - intro.tex}
-\input{chapters/2 - math.tex}
-\input{chapters/3 - environments.tex}
-\input{chapters/4 - more.tex}
+\input{chapters/1 - introduction.tex}
+\input{chapters/2 - modeling.tex}
+\input{chapters/3 - simulation.tex}
+\input{chapters/4 - linearization.tex}
+\input{chapters/5 - estimation.tex}
+\input{chapters/6 - control.tex}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% APPENDICES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendices
-\input{chapters/A - background.tex}
+\input{chapters/Appendix A - derivations.tex}
 
 \backmatter
 

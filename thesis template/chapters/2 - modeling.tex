@@ -1,74 +1,249 @@
-\chapter{Mathematics}
+\chapter{Modeling}
+Although a unicycle is a fairly complex system, it can be thought of in various 
+ways. The most useful of which, will be as a inverted pendulum affixed atop a 
+cart. It's states can be seen from inspection of its movement and state
+equations can be derived by using newtonian mechanics to derive a continuous
+nonlinear time-invariant system.
 
-One of the main benefits of LaTeX is that it produces beautiful equations. You may think that you can replicate this in Microsoft Word, but I assure you, any mathematician can tell the difference (and loathes nasty pixelated equations!).
+Upon inspection we can note the following states, additionally shown in \ref{fig:unicycle_states}.
+\begin{itemize}
+   \vspace{-0.3cm}\item $x$ positional states: $x$ and $\dot{x}$
+   \vspace{-0.3cm}\item $y$ positional states: $y$ and $\dot{y}$
+   \vspace{-0.3cm}\item Yaw states: $\theta$ and $\dot{\theta}$
+   \vspace{-0.3cm}\item Roll states: $\phi$ and $\dot{\phi}$
+   \vspace{-0.3cm}\item Wheel pitch states: $\Omega$ and $\omega$
+   \vspace{-0.3cm}\item Fork pitch states: $\alpha$ and $\dot{\alpha}$
+\end{itemize}
 
+Additionally, we define the following constants that parametrize the simulation.
+\begin{itemize}
+   \vspace{-0.3cm}\item Radius of the wheel: $r$
+   \vspace{-0.3cm}\item Distance between center of wheel and seat height: $d$
+   \vspace{-0.3cm}\item Mass of the wheel: $m_w$
+   \vspace{-0.3cm}\item Moment of the wheel around the z axis: $I_{wz}$
+   \vspace{-0.3cm}\item Moment of the wheel around the y axis: $I_{wy}$
+   \vspace{-0.3cm}\item Mass of the seat and rider at $d$: $m_r$
+   \vspace{-0.3cm}\item Force of gravity: $g$
+\end{itemize}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Typesetting equations}
-For equations, we take our guidelines from the \verb|amsmath| package. 
-Inline equations such as $e^{i\pi}=-1$ should be typeset using the \verb|$...$| syntax.
-
-\paragraph{Displayed equations}
-
-If an equation is larger or more important and you want to put it on its own line, use the \verb|equation| or \verb|equation*| environment, depending on whether you want equation numbers or not. For non-numbered equations, you can use the shortcut \verb|\[...\]|. Only number an equation if you plan on referring to it later on. Equations are part of the text, so use punctuation in equations. To refer to an equation, give it a \verb|label| and use the \verb|eqref| command to refer to it. For example, the inline equation above was
-\begin{equation}\label{eqn:euler}
-  e^{i\pi} + 1 = 0,
-\end{equation}
-and we can refer to it as \eqref{eqn:euler} in the main text. Do not put the word ``equation'' before the reference, unless it starts a sentence. \Cref{eqn:euler} is an elegant equation that uses the symbols $e$, $i$, $\pi$, $0$, $1$, and $+$ all in a single equation. When starting a sentence with an equation, you can either type the word ``equation'' or use the \verb|\Cref| command. See \cref{sec:references} for more discussion about references.
-
-\paragraph{Long equations}
-
-For equations that do not fit on one line, use the \verb|multline| or \verb|multline*| command, again depending on whether you want an equation number or not. For example,
-\begin{multline}
-	(x+y+z)^4 =
-	x^4+4 x^3 y+4 x^3 z+6 x^2 y^2+12 x^2 y z+6 x^2 z^2+4 x y^3+12 x y^2 z\\
-	+12 x y z^2+4 x z^3+y^4+4 y^3 z+6 y^2 z^2+4 y z^3+z^4.
-\end{multline}
-When breaking apart an equation, put the dangling symbol (in the case above, $+$) on a new line. Do not end a line with a symbol.
-
-\paragraph{Aligned equations}
-
-To align equations, use the \verb|align| environment. A common usage is to align equations at the $=$ sign to make them more legible. When numbering equations that belong to the same group, use the \verb|subequations| environment. This produces
-\begin{subequations} \label{eqn:expanded_state_space}
-\begin{align}
-\dot x(t) &= A   x(t) + B_1    u(t) + B_2    w(t), \label{eq_state}       \\
-  	 y(t) &= C_1 x(t) + D_{11} u(t) + D_{12} w(t), \label{eq_measurement} \\
-	 z(t) &= C_2   x(t) + D_{21} u(t) + D_{22} w(t). \label{eq_regulation}
-\end{align}
-\end{subequations}
-We can then refer to all equations together as \eqref{eqn:expanded_state_space}, or to individual equations such as \eqref{eq_state} and \eqref{eq_measurement}.
-
-\paragraph{Additional information}
-
-For a detailed guide on how to typeset equations, it is worth taking a look at the \verb|amsmath| user's guide\footnote{\url{http://mirrors.ctan.org/macros/latex/required/amsmath/amsldoc.pdf}}.
+Finally, we define the following inputs to the system. Note, that in order to
+simplify the modeling, we use torques on the seat rather than adding a vector
+of which a rider's center of mass could be controlled. These are equivalent
+however their relation is not explicitly defined by this document.
+againa
+againa
+Aa
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Linear algebra}
+balanceb
 
-\paragraph{Vector spaces}
 
-The vector space of $n$-dimensional real vectors is $\real^n$. Use the commands \verb|\bmat| and \verb|\pmat| to make vectors (and matrices) that use square brackets and parentheses, respectively. For example,
-\[
-  \bmat{x_1 \\ x_2 \\ \vdots \\ x_n} \qquad\text{and}\qquad \pmat{4 \\ 3 \\ -1 \\ 2}.
-\]
-The set of complex numbers is $\complex$, and the set of integers is $\integer$.
+asd
 
-\paragraph{Matrices}
+asd
+asd
+asd
+asd
 
-Matrices are denoted by capital letters, such as $A$ or $B$. The transpose of a matrix is $A^\tp$, and the conjugate transpose is $A^*$. For square matrices, the trace is $\trace(A)$ and the determinant is $\det(A)$. Like vectors, you can create matrices such as
-\[
-  \bmat{a_{11} & a_{12} \\ a_{21} & a_{22}} \qquad\text{and}\qquad \pmat{1 & 2 \\ 3 & 4}.
-\]
-To separate blocks of a large matrix, use the \verb|\array| environment, and use \verb|\vdots|, \verb|\ldots|, and \verb|\ddots| to indicate repeated patterns in matrices. For example,
-\[
-  \left[\begin{array}{c|c}
-  A & B \\ \hline C & D \end{array}\right] = \left[\begin{array}{cccccc|c}
-  0 & 1 & 0 & \ldots & 0 & 0 & 0 \\
-  0 & 0 & 1 & \ldots & 0 & 0 & 0 \\
-  \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots \\
-  0 & 0 & 0 & \ldots & 1 & 0 & 0 \\
-  0 & 0 & 0 & \ldots & 0 & 1 & 0 \\
-  -a_0 & -a_1 & -a_2 & \ldots & -a_{n-2} & -a_{n-1} & 1 \\ \hline
-  b_0 & b_1 & b_2 & \ldots & b_{n-2} & b_{n-1} & 0 \end{array}\right].
-\]
+Aa
+\begin{itemize}
+   \vspace{-0.3cm}\item Wheel Torque: $\tau_1$
+   \vspace{-0.3cm}\item Seat Roll Torque: $\tau_2$
+   \vspace{-0.3cm}\item Seat Pitch Torque: $\tau_3$
+\end{itemize}
+
+\section{Definition of States}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.403125\linewidth]{with states.png}
+  \caption{Drawing of a Unicycle with states}
+  \label{fig:unicycle_states}
+\end{figure}
+
+This state, $x$ can be written in column vector form:
+$$
+x = \begin{bmatrix}
+  x            \\
+  y            \\
+  \theta       \\
+  \phi         \\
+  \Omega       \\
+  \alpha       \\
+  \dot{x}      \\
+  \dot{y}      \\
+  \dot{\theta} \\
+  \dot{\phi}   \\
+  \omega       \\
+  \dot{\alpha} \\
+\end{bmatrix}$$
+
+\section{Derivation of State Derivatives}
+
+When calculating $\dot{x}$, the states can be divided into two set. The first
+set of states are those which can be easily passed through in the state space 
+model, i.e $\dot{x} \rightarrow \dot{x}$. The second set, requires an equation
+based on the first and second set. i.e $\ddot{x} = ?$. For this, some constants
+will be defined. $r$ is the radius of the wheel.
+
+\paragraph{Positional Vectors $\ddot{x}$ and $\ddot{y}$}
+Calculating these linear accelerations is possible by splitting the linear 
+distance function into its components via $\theta$ and then repeatedly deriving
+with respect to linear Additionally, on inspection we can see that angular
+acceleration will be linearly related to linear acceleration and the
+wheel's radius.
+
+Starting with the equation for the arc length of a wheel, $s = r\Omega$ where
+$s$ is the distance swept by a wheel of radius $r$ over an angle $\Omega$ (note
+the intentional reuse of $\Omega$). This equation can be derived, into the
+formula for the linear velocity of processing wheel $v = r\omega$ where $v$ is
+the velocity of the traveling wheel in the direction of motion and $\omega$ and
+$\dot{\Omega}$ are the angular velocities of the wheel. By splitting this
+equation into two based on components we arrive at
+\begin{align*}
+  v_x = \dot{x} &= r \cdot \omega \cdot \cos(\theta) \\
+  v_y = \dot{y} &= r \cdot \omega \cdot \sin(\theta) 
+\end{align*}
+
+Finally, the derivative of this set of equations can be taken one more time find
+the desired formula for linear acceleration.
+\begin{align*}
+  \ddot{x} &= r (\dot{\omega} \cos(\theta) - \omega \sin(\theta)\dot{\theta}) \\
+  \ddot{y} &= r (\dot{\omega} \sin(\theta) + \omega \cos(\theta)\dot{\theta})
+\end{align*}
+
+\paragraph{Rotation $\theta$}
+Upon inspection, one notices that $\theta$ only changes based off of $\phi$. In
+order for a unicycle to change it's $\theta$, the rider must lean to one side
+and change $phi$ first!
+
+Imagine a unicycle balanced slightly over at an angle and going forward in its
+own local frame of reference. As it unicycle moves forward, it will rotate
+through $\theta$ tracing a perfect arc, dependent on the body angle $\phi$. By
+trying some values, it can be noticed that if an angle $\phi = 0$ the radius
+of the circle traces goes to infinity. Meanwhile, if the angle is larger, 
+something closer to $\phi = \pm \frac{\pi}{8}$, then theta will slowly change
+based on the current phi. 
+
+With this in mind, the formula for this arc is the turning radius ($r_t$) of a
+tilted. $r_t = \frac{r}{\sin(\phi)}$, the derivation of which is shown in
+\ref{fig:turn_radius_derivation}, can be used to relate $r_t$, $r$, and $\phi$.
+However, we now need a relation between $r_t$ and $\dot{\theta}$. This can be
+derived from the formula for arc length used previously. The formula
+$s = r\theta$, can once again be reinterpreted as $s = r_t\theta$ where $s$ the
+arc length of the turn radius that is swept by a wheel of radius $r$ traveling=
+over that arc an angle $\theta$. This means we can take the derivative of this
+formula to arrive at  $v = r_t\dot{theta}$. Finally, since we don't store the
+wheel's local forward velocity we can rewrite it in terms of angular
+acceleration as $\dot{\theta} = \frac{r\omega}{r_t}$. Now, by plugging in the
+formula derived earlier, we finally achieve
+$\dot{\theta} = \frac{r\omega\sin(\phi)}{r} = \omega\sin(\phi)$.
+Finally, by applying the product rule we can find the desired formula for
+$\ddot{\theta}$
+
+$$\ddot{\theta} = \dot{\omega}\sin(\phi) + \omega \dot{\phi}\cos(\phi)$$
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.525\linewidth]{derivation_turn_radius.png}
+  \caption{Drawing of a Unicycle with states}
+  \label{fig:turn_radius_derivation}
+\end{figure}
+
+\paragraph{Rotation $\phi$}
+Upon inspection, one notices that if perfectly balanced, a unicycle stands
+perfectly vertical it will stay there, however any slight perturbation will
+cause it to fall over. Additionally, the only perturbation that could cause this
+is the torque $\tau_2$ as every other input acts such that no matter its value,
+there will be no change on $phi$. 
+
+From this, assuming the unicycle is not moving forward, we can create a 
+simplified model of it. This is model in REFERENCE FIGURE. On this model, we 
+have the force of gravity acting at both the center of mass of the wheel and 
+on the rider. Additionally, we have a torque acting on the rider's center of
+mass. The gravitational forces can be split up into components along and
+perpendicular to the unicycle, with those along being canceled by the normal
+force of the unicycle. This leaves $F_{gravity, wheel} \sin(\phi)$, 
+$F_{gravity, rider} \sin(\phi)$ and $\tau_2$. By using newton's third law for
+rotation we see that the sum of torques $\sum \tau = I\alpha$ or, restated into
+the conventions of this document, $\sum = I \ddot{\phi}$ must be related. By
+combining all of these, we arrive at the formula
+$$I_{pivot} \ddot{\phi} = m_wrg\sin(\phi) + m_rg(r+d)\sin(\phi)+\tau_2$$
+where $I_{pivot} = m_wr + m_r(r+d)$ and is the moment corresponding to the pivot
+point being at the point of contact of the wheel.
+
+This formula is accurate in the case of the unicycle when there is zero motion
+however once the unicycle starts to move, there are additional forces in play,
+the centrifugal force and the gyroscopic force. 
+
+Since we are working with torques, we need the formula for the torque caused
+by the centrifugal force. This can be interpreted as a torque occurring at the
+center of mass of the combined system of the rider and wheel perpendicular to
+the body of the unicycle, that is $\tau_c = d_cF_cm_c\cos(\phi)$ where
+$d_c$ is the distance from the pivot to the center of mass, $F_c$ is the
+centrifugal force, $m_c$ is the total mass of the system. Additionally, note the
+$\cos(\phi)$ term, because the centrifugal force acts parallel to the global y
+axis regardless of the angle $\phi$ of the unicycle, it must be broken down into
+components that are cancelled by the unicycle's normal force and those which act
+as a net torque perpendicular to the axis of travel. 
+
+Starting off with $d_c$, it can be found by treating the unicycle as a seesaw
+and finding the location at which the torques balance. This formula is defined
+in \ref{par:d_c derivation} and resolves to
+$d_c = \frac{m_rr + dm_r + m_wr}{m_w+m_r}$. Next, is
+$F_c$, which additional is defined in \ref{par:F_c derivation} to be
+$F_c = r_w \omega \dot{\theta} m_c$.
+These three formulas can be combined together to form
+$$ \tau_c = r_w \omega \dot{\theta} m_c d_c \cos(\phi)$$
+
+Finally, the gyroscopic torque can be calculated and, as detailed in
+\ref{par:t_g derivation}, its the formula is
+$\tau_g = I_{wz} \omega \dot{\theta} \cos(\phi)$
+
+This can now be stated as 
+$$\ddot{\phi} = \frac{\tau_{gravity} + \tau_2 + \tau_c + tau_{gyroscopic}}{I_{pivot}}$$
+
+\paragraph{Rotation $\omega$ and $\alpha$} 
+The omega and alpha terms are special as they are interlinked. We will address
+their derivations separately, resolving two separate equations, both dependent 
+on $\dot{\omega}$ and $\ddot{\alpha}$ and then use algebraic substitution. 
+Their derivations are explained in detail in the Appendix; however, here we 
+will place their full definitions, where the system determinant is defined as
+$\Delta = [ (m_w + m_r)r^2 + I_{wy} ] [ I_{wy} + m_r d^2 ] - ( m_r r d \cos \alpha )^2$.
+
+The explicit formula for wheel acceleration is:
+$$
+\dot{\omega} = \frac{ ( I_{wy} + m_r d^2 ) (m_r g d \sin \alpha) - (m_r r d \cos \alpha)(m_r g d \sin \alpha - \tau_1) }{ \Delta }
+$$
+
+The explicit formula for pitch acceleration is:
+$$
+\ddot{\alpha} = \frac{ [ (m_w + m_r)r^2 + I_{wy} ] (m_r g d \sin \alpha - \tau_1) - (m_r r d \cos \alpha)(m_r g d \sin \alpha) }{ \Delta }
+$$
+
+\paragraph{Final state equation}
+Now that each sub-equation has been derived and the dependencies substituted,
+the final non-linear state update vector $\dot{x}$ can be written.
+
+$$
+\dot{x} = \begin{bmatrix}
+  \dot{x} \\
+  \dot{y} \\
+  \dot{\theta} \\
+  \dot{\phi} \\
+  \omega \\
+  \dot{\alpha} \\
+  r (\dot{\omega} \cos\theta - \omega \dot{\theta} \sin\theta) \\
+  r (\dot{\omega} \sin\theta + \omega \dot{\theta} \cos\theta) \\
+  \dot{\omega}\sin\phi + \omega\dot{\phi}\cos\phi \\
+  \dfrac{ [ m_w r + m_r (r+d) ] (g\sin\phi + r \omega \dot{\theta} \cos\phi) - I_{wz} \omega \dot{\theta} \cos\phi + \tau_2 }
+    { m_w r^2 + m_r(r+d)^2 + I_{wy} } \\
+  \dfrac{ ( m_r d^2 ) (\tau_1) - (m_r r d \cos \alpha)(m_r g d \sin \alpha - \tau_1 + \tau_3) }
+    { [ (m_w + m_r)r^2 + I_{wy} ] [ m_r d^2 ] - ( m_r r d \cos \alpha )^2 } \\
+  \dfrac{ [ (m_w + m_r)r^2 + I_{wy} ] (m_r g d \sin \alpha - \tau_1 + \tau_3) - (m_r r d \cos \alpha)(\tau_1) }
+    { [ (m_w + m_r)r^2 + I_{wy} ] [ m_r d^2 ] - ( m_r r d \cos \alpha )^2 }
+\end{bmatrix}
+$$
+
+
+Some interesting things can be gleamed from this equation. Most notably the
+fact that $\tau_1$ and $\tau_3$ are highly coupled but not identical!
