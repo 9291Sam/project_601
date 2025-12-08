@@ -1,4 +1,4 @@
-clc; clear; close all;
+function draw(sys, x)
 
 f = figure();
 clf;
@@ -14,10 +14,11 @@ view(3);
 xlabel('X'); ylabel('Y'); zlabel('Z');
 plot3(0, 0, 0, 'kx', 'MarkerSize', 15, 'LineWidth', 2);
 
-wheel_center_seat_distance = 2.5;
-wheel_radius = 1.0;
+
+
+wheel_center_seat_distance = sys.d;
+wheel_radius = sys.r;
 wheel_width = 0.25;
-simulation_delta_time = 1/60;
 
 unicycle_root_transform = hgtransform; 
 
@@ -36,32 +37,24 @@ surf(xc, yc, zc, 'Parent', wheel_xrotated_pi2, 'FaceColor', [0.2 0.2 0.2], 'Edge
 plot3([0 0], [0 wheel_radius], [0 0], 'LineWidth', 3, 'Color', 'b', 'Parent', wheel_xrotated_pi2);
 
 
-t = 0;
-pathRadius = 6.0;
+last_valid_k = 1;
 
-% Inputs: 
-% wheel torque        | τ_1
-% lean side torque    | τ_2  
-% lean forward torque | τ_3
+for k = 1:size(x,1)
 
-% Outputs:
-% wheel position        | x y
-% wheel pitch (rolling) | Ω
-% wheel yaw             | θ
-% wheel roll            | φ
-% shaft lean            | α
+    if (abs(x(k, 4)) < pi/2 && abs(x(k, 6)) < pi/2)
+        last_valid_k = k;
+    end
 
 
-while ishandle(f)
-    x = pathRadius * cos(t);
-    y = pathRadius * sin(t);
-    theta = t + (pi/2); % tangent to a circle
-    phi = -0.3;
-    Omega = -(pathRadius * t) / wheel_radius;
-    alpha = -0.3;
+    % rendering
+    x_pos = x(last_valid_k, 1);
+    y = x(last_valid_k, 2);
+    theta = x(last_valid_k, 3); % tangent to a circle
+    phi = x(last_valid_k, 4);
+    Omega = x(last_valid_k, 5);
+    alpha = x(last_valid_k, 6);
     
-    
-    T_pos  = makehgtform('translate', [x, y, wheel_radius]);
+    T_pos  = makehgtform('translate', [x_pos, y, wheel_radius]);
     T_yaw  = makehgtform('zrotate', theta);
     T_lean = makehgtform('xrotate', phi);
     
@@ -72,5 +65,11 @@ while ishandle(f)
 
     set(seat_transform, 'Matrix',  makehgtform('yrotate', alpha))
     
-    drawnow; t = t + simulation_delta_time; pause(simulation_delta_time);
+    disp("rendering state");
+    x
+    drawnow; pause(1/30)
+end
+
+
+
 end

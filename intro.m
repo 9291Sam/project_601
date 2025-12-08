@@ -12,9 +12,9 @@
 
 
 %% Simulate the system starting at the unstable equilibrium
-% clc; clear; close all;
+clc; clear; close all;
 
-% % cart-pole system
+% % % cart-pole system
 % sys = cartpole();
 
 % % initial condition (vertical)
@@ -29,6 +29,27 @@
 % % visualize the dynamics
 % sys.draw(x);
 
+
+
+sys = unicycle();
+
+initial_velocity = 1.5; 
+initial_omega = initial_velocity / sys.r; 
+
+x0 = zeros(12, 1);
+% x0(8) = 0.5;
+x0(3) = 5*pi/4; % theta
+x0(4) = 0.0001; % phi
+% x0(9) = -0.5; % theta dot
+x0(11) = initial_omega; % Set initial wheel speed
+x0(7) = initial_velocity * cos(x0(3)); % Set initial x velocity
+x0(8) = initial_velocity * sin(x0(3)); % Set initial y velocity
+
+t = 0:0.1:60;
+
+x = sys.simulate(t, x0);
+
+sys.draw(x);
 
 %% Control via pole placement
 % clc; clear; close all;
