@@ -41,33 +41,34 @@ last_valid_k = 1;
 
 for k = 1:size(x,1)
 
-    if (abs(x(k, 4)) < pi/2 && abs(x(k, 6)) < pi/2)
+    % if (abs(x(k, 4)) < pi/2 && abs(x(k, 6)) < pi/2)
         last_valid_k = k;
-    end
+    % end
 
 
     % rendering
     x_pos = x(last_valid_k, 1);
     y = x(last_valid_k, 2);
     theta = x(last_valid_k, 3); % tangent to a circle
-    phi = x(last_valid_k, 4);
-    Omega = x(last_valid_k, 5);
-    alpha = x(last_valid_k, 6);
+    phi = x(last_valid_k, 5);
+    Omega = x(last_valid_k, 10);
+    alpha = x(last_valid_k, 7);
     
-    T_pos  = makehgtform('translate', [x_pos, y, wheel_radius]);
+    T_contact = makehgtform('translate', [x_pos, y, 0]);
     T_yaw  = makehgtform('zrotate', theta);
     T_lean = makehgtform('xrotate', phi);
+    T_hub_offset = makehgtform('translate', [0, 0, wheel_radius]);
     
     % Handles x, y, theta, and phi
-    set(unicycle_root_transform, 'Matrix', T_pos * T_yaw * T_lean);
+    set(unicycle_root_transform, 'Matrix', T_contact * T_yaw * T_lean * T_hub_offset);
     
     set(wheel_transform, 'Matrix', makehgtform('yrotate', Omega));
 
     set(seat_transform, 'Matrix',  makehgtform('yrotate', alpha))
     
     disp("rendering state");
-    x
-    drawnow; pause(1/30)
+    x(k, :)
+    drawnow; pause(1/120)
 end
 
 

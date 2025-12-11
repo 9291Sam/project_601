@@ -29,28 +29,108 @@ clc; clear; close all;
 % % visualize the dynamics
 % sys.draw(x);
 
+% sys = unicycle();
 
+% % Initial Conditions
+% x0 = zeros(10, 1);
+% x0(1) = 0; % global x
+% x0(2) = 0; % global y
+% x0(3) = 0; % theta
+% x0(4) = 0; % v
+% x0(5) = 0; % phi
+% x0(6) = 0; % dphi
+% x0(7) = 0.1; % alpha
+% x0(8) = 0; % dalpha
+% x0(9) = 0; % dtheta
+% x0(10) = 0; % omega
 
+% % Simulation Time
+% t = 0:0.01:5;
+
+% x = sys.simulate_no_input(t, x0);
+
+% sys.draw(x);
+% 1. Setup
 sys = unicycle();
+t_span = 0:0.1:25;
 
-initial_velocity = 1.5; 
-initial_omega = initial_velocity / sys.r; 
+% 2. Linearize around SLOWER Equilibrium
+x_eq = zeros(10, 1);
+x_eq(4) = 1.5; % Slow down to 1.5 m/s for tighter turns
+u_eq = [0; 0];
 
-x0 = zeros(12, 1);
-% x0(8) = 0.5;
-x0(3) = 5*pi/4; % theta
-x0(4) = 0.0001; % phi
-% x0(9) = -0.5; % theta dot
-x0(11) = initial_omega; % Set initial wheel speed
-x0(7) = initial_velocity * cos(x0(3)); % Set initial x velocity
-x0(8) = initial_velocity * sin(x0(3)); % Set initial y velocity
+[A, B] = sys.linearize(x_eq, u_eq);
+[A, B] = sys.linearize(x_eq, u_eq);
 
-t = 0:0.1:60;
+% 3. Slice Matrices for LQR (FIXED: REMOVED STATE 9)
+% We keep: v(4), phi(5), dphi(6), alpha(7), dalpha(8)
+idx_ctrl = [4, 5, 6, 7, 8]; 
 
-x = sys.simulate_no_input(t, x0);
+A_lqr = A(idx_ctrl, idx_ctrl);
+B_lqr = B(idx_ctrl, :);
 
-sys.draw(x);
+% 4. Design LQR Controller
+idx_ctrl = [4, 5, 6, 7, 8]; 
+A_lqr = A(idx_ctrl, idx_ctrl);
+B_lqr = B(idx_ctrl, :);
 
+Q_diagonals = [
+    10    % v (Velocity)
+    500   % phi (Roll Angle - CRITICAL: much higher gain to force the lean)
+    1     % dphi 
+    100   % alpha (Pitch Stability)
+    10    % dalpha
+];
+Q = diag(Q_diagonals);
+R = diag([1, 10]); 
+
+K = lqr(A_lqr, B_lqr, Q, R);
+
+% 5. Simulation
+% We wrap the controller to inject the Figure-8 logic
+controller = @(t, x) figure_8_logic(t, x, K, x_eq);
+
+x0 = x_eq; 
+% Add a tiny perturbation so it doesn't get stuck in the 'perfect' equilibrium
+x0(5) = 0.001; 
+
+% ... [Setup and LQR calculation from previous step] ...
+
+% 5. Simulation
+% Use the corrected dynamics_with_input function
+[t_out, x_out] = ode45(@(t,x) sys.dynamics_with_input(t, x, controller), t_span, x0);
+
+% 6. Visualize
+sys.draw(x_out);
+
+
+function u = figure_8_logic(t, x, K, x_eq)
+    % Extract control states
+    idx_ctrl = [4, 5, 6, 7, 8];
+    x_sub = x(idx_ctrl);
+    
+    target_v = x_eq(4); % Now 1.5 m/s
+    
+    % --- TIGHTER FIGURE 8 ---
+    % Faster switching (10s total cycle) + Steeper Lean (0.35 rad)
+    cycle_time = 5; 
+    lean_amount = 0.35; % ~20 degrees
+    
+    if mod(t, cycle_time) < cycle_time/2
+        phi_ref = lean_amount;  % Turn Right
+    else
+        phi_ref = -lean_amount; % Turn Left
+    end
+    
+    % Reference State
+    ref_state = [target_v; phi_ref; 0; 0; 0];
+    
+    error = x_sub - ref_state;
+    u = -K * error;
+    
+    % Clamp Inputs
+    u = max(min(u, [100; 50]), -[100; 50]);
+end
 %% Control via pole placement
 % clc; clear; close all;
 

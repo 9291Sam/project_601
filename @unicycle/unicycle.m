@@ -26,8 +26,8 @@ classdef unicycle
 
     methods
         function obj = unicycle()
-            obj.num_states = 12;
-            obj.num_inputs = 0;
+            obj.num_states = 10;
+            obj.num_inputs = 2;
 
             obj.r = 0.5;
             obj.d = 1.25;
