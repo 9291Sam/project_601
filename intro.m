@@ -47,7 +47,7 @@ x0(8) = initial_velocity * sin(x0(3)); % Set initial y velocity
 
 t = 0:0.1:60;
 
-x = sys.simulate(t, x0);
+x = sys.simulate_no_input(t, x0);
 
 sys.draw(x);
 

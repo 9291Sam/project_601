@@ -11,12 +11,18 @@ q  = [x; y; theta; phi; Omega; alpha];
 dq = [dotx; doty; dottheta; dotphi; omega; dotalpha];
 ddq = [ddotx; ddoty; ddottheta; ddotphi; dotomega; ddotalpha];
 
+% t_1 - wheel pitch
+% t_2 - seat roll
+% t_3 - seat pitch
+syms t_1 t_2 t_3 'real';
+
+
 % r          - wheel radius
 % d          - distance between fork and hub
 % m_w        - wheel mass
 % m_s        - seat mass
-% I_wpitch   - Wheel pitch moment (rolling)
-% I_wyawroll - Wheel not pitch moment
+% I_wpitch   - Wheel pitch moment
+% I_wyawroll - Wheel roll moment
 % g          - gravitational constant
 syms r d m_w m_s I_wpitch I_wyawroll g 'real'; 
 
@@ -101,10 +107,6 @@ L = simplify(T - U);
 % ∂ = p
 % (d/dt)(pL/pdq) - (pL/pq) = generalized forces
 
-q = q';
-dq = dq';
-ddq = ddq';
-
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %                  evaluate partial derivatives                           %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -113,13 +115,13 @@ ddq = ddq';
 %  DL_Dq  ==  ---      Note that 'D' is partial derivative here 
 %              Dq
 %
-DL_Dq = jacobian(L,q')';
+DL_Dq = jacobian(L,q)';
 
 %              DL  
 %  DL_Ddq  ==  ---      Note that 'D' is partial derivative here 
 %              Ddq
 %
-DL_Ddq = jacobian(L,dq);
+DL_Ddq = jacobian(L,dq)';
 
 %                D  / DL  \         * Note that some of those 'd' should be
 % DDL_DtDdq  ==  -- | --  |         curvy 'D' to represent partial
@@ -128,7 +130,7 @@ DL_Ddq = jacobian(L,dq);
 % Note the application of the chain rule:  (Quoting Andy Ruina: )
 %      d BLAH / dt  =  jacobian(BLAH, [q qdot])*[qdot qddot]'
 %
-DDL_DtDdq = jacobian(DL_Ddq',[q, dq]) * [dq, ddq]';
+DDL_DtDdq = jacobian(DL_Ddq,[q; dq]) * [dq; ddq];
 
 
 %Write out as single equation and simplify:
@@ -151,14 +153,37 @@ M = jacobian(EoM,ddq);
 % Now, we want to find f(q,dq). We can do this by substituting in zero for
 % the acceleration vector (dqq)
 
-f = subs(EoM,ddq,sym([0, 0, 0, 0, 0, 0]));
+f = subs(EoM,ddq,sym([0; 0; 0; 0; 0; 0]));
 
 % https://www.mathworks.com/help/symbolic/sym.matlabfunction.html
-matlabFunction(M, "File", "getMassMatrix", "Vars", [q, dq, r, d, m_w, m_s, I_wpitch, I_wyawroll, g]);
-matlabFunction(f, "File", "getFVector", "Vars", [q, dq, r, d, m_w, m_s, I_wpitch, I_wyawroll, g]);
+matlabFunction(M, "File", "getMassMatrix", "Vars", [q; dq; r; d; m_w; m_s; I_wpitch; I_wyawroll; g]);
+matlabFunction(f, "File", "getFVector", "Vars", [q; dq; r; d; m_w; m_s; I_wpitch; I_wyawroll; g]);
 
 % when simulating, n
 % EoM = M(q,dq)*qdd + f(q,dq) == 0;
 %  M(q,dq)*qdd == -f(q,dq);
 % qdd = M(q, dq)^-1 * -f(q, dq)
+
+% assuming input vector is a column vector [t_1; t_2; t_3]
+B = [
+    0 0 0;
+    0 0 0;
+    0 0 0;
+    0 1 0;
+    1 0 0;
+    0 0 1;
+];
+
+matlabFunction(B, "File", "getInputMatrix", "Vars", [q; dq; r; d; m_w; m_s; I_wpitch; I_wyawroll; g])
+
+% inputs
+% EoM = M(q,dq)*qdd + f(q,dq) == 0;
+% EoM = M(q,dq)*qdd + f(q,dq) == sum Q; (601 document) 
+% each tau is a vector 
+% Q = 
+
+% t_1 - torque on the wheel (pitch)
+% t_2 - torque on the seat (pitch)
+% t_3 - torque on the seat (roll)
+
 end
