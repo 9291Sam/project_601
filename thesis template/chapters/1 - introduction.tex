@@ -1,19 +1,34 @@
-\chapter{Introduction to the Unicycle as a Dynamical System}
+\chapter{Introduction to the Ballbot as a Dynamical System}
 
-In the modern day, the unicycle is thought of as having the form as shown in 
-Figure \ref{fig:patent_unicycle}. This form was patented in 1963 and serves
-as the most common example of a unicycle
+The ballbot is a recently patented (REF CITE PATENT) robot with a unique 
+structure. That structure consists of a spherical base combined with a tall, 
+narrow body. Unlike other, statically stable robots, the ballbot is inherently
+unstable, however the narrow and vertical body make it of significant interest
+for human-interactive robotics and navigation within flat environments.
 
-This form of a unicycle consists of two moving and interlinked parts: the fork
-and the wheel. The wheel stays in constant contact with the ground and is
-connected to the hub in it's center. This hub, in turn is connected to the
-lowest part of the fork. On the other end of the fork, there is a seat for the
-user.
+Physically, the ballbot consists of two moving and interlinked parts: the ball
+and the body. The ball is a non-massless sphere which remains in constant
+contact with the ground. The body, which houses the control hardware and power
+supply, balances on top the ball. In practical application, there are typically
+three points of contact, each of which is a attached to a motor which drive the
+wheel and allow the robot to balance and move
 
-From inspection, it is possible to see that this has a form similar to that
-of a cart with an attached inverted pendulum. For the purposes of this document,
-we will assume that 
+From a control theory perspective, one can see that a ballbot isn't derived from
+any other system, but is instead, related to a 3D inverted pendulum. More
+specifically, the ball is modeled as a uniformly dense sphere which is attached
+to a uniformly dense cylinder. This system is inherently unstable under open-loop conditions, only having one
+unstable equilibrium when the ballbot is perfectly vertically aligned. Without
+active control, the ballbot will rapidly diverge from this equilibrium.
 
-As will be described in subsequent chapters, we define the unicycle as having 
-three inputs in the form of torques and 5 outputs in the form of positions and
-angular rotations.
+The ballbot currently has limited commercial uses, it's distinct structure,
+ability to maneuver narrow spaces, and ability for zero-turn rotation make it of
+interest for modern development in fields ranging from logistics, to security,
+or even personal robotics.
+
+As will be described in subsequent chapters, we define the ballbot as having 2
+perpendicular inputs representing torques on the ball, and 8 states,
+representing positions, angles, velocities and angular velocities of both the
+ball and the body. We will not be modeling the yaw rotation of the body, nor
+will we assume that slipping can occur between the ball and the ground. Finally,
+the rotation of the ball itself will not be modeled as that would transform
+the system into a non-holonomic system for no practical gain.

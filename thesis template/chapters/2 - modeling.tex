@@ -1,56 +1,40 @@
 \chapter{Modeling}
-Although a unicycle is a fairly complex system, it can be thought of in various 
+Although a ballbot is a fairly complex system, it can be thought of in various 
 ways. The most useful of which, will be as a inverted pendulum affixed atop a 
-cart. It's states can be seen from inspection of its movement and state
-equations can be derived by using newtonian mechanics to derive a continuous
+cart. It's states can be seen from inspection of its movement, while state
+equations can be derived by using lagrangian mechanics to derive a continuous
 nonlinear time-invariant system.
 
 Upon inspection we can note the following states, additionally shown in \ref{fig:unicycle_states}.
 \begin{itemize}
    \vspace{-0.3cm}\item $x$ positional states: $x$ and $\dot{x}$
    \vspace{-0.3cm}\item $y$ positional states: $y$ and $\dot{y}$
-   \vspace{-0.3cm}\item Yaw states: $\theta$ and $\dot{\theta}$
+   \vspace{-0.3cm}\item Pitch states: $\theta$ and $\dot{\theta}$
    \vspace{-0.3cm}\item Roll states: $\phi$ and $\dot{\phi}$
-   \vspace{-0.3cm}\item Wheel pitch states: $\Omega$ and $\omega$
-   \vspace{-0.3cm}\item Fork pitch states: $\alpha$ and $\dot{\alpha}$
 \end{itemize}
 
 Additionally, we define the following constants that parametrize the simulation.
 \begin{itemize}
-   \vspace{-0.3cm}\item Radius of the wheel: $r$
-   \vspace{-0.3cm}\item Distance between center of wheel and seat height: $d$
-   \vspace{-0.3cm}\item Mass of the wheel: $m_w$
-   \vspace{-0.3cm}\item Moment of the wheel around the z axis: $I_{wz}$
-   \vspace{-0.3cm}\item Moment of the wheel around the y axis: $I_{wy}$
-   \vspace{-0.3cm}\item Mass of the seat and rider at $d$: $m_r$
+   \vspace{-0.3cm}\item Radius of the ball: $r$
+   \vspace{-0.3cm}\item Distance between center of mass of the ball ball and the center of mass of the body: $d$
+   \vspace{-0.3cm}\item Mass of the ball: $m_{ball}$
+   \vspace{-0.3cm}\item Mass of the body: $m_{body}$
+   \vspace{-0.3cm}\item Moment of the ball around all axes: $I_{ball}$
+   \vspace{-0.3cm}\item Moment of the body around the x and y axes: $I_{bodyxy}$
+   \vspace{-0.3cm}\item Moment of the body around the z axis: $I_{bodyz}$
    \vspace{-0.3cm}\item Force of gravity: $g$
 \end{itemize}
 
-Finally, we define the following inputs to the system. Note, that in order to
-simplify the modeling, we use torques on the seat rather than adding a vector
-of which a rider's center of mass could be controlled. These are equivalent
-however their relation is not explicitly defined by this document.
-againa
-againa
-Aa
-
-
-balanceb
-
-
-asd
-
-asd
-asd
-asd
-asd
-
-Aa
+Finally, we define the following inputs to the system.
 \begin{itemize}
-   \vspace{-0.3cm}\item Wheel Torque: $\tau_1$
-   \vspace{-0.3cm}\item Seat Roll Torque: $\tau_2$
-   \vspace{-0.3cm}\item Seat Pitch Torque: $\tau_3$
+   \vspace{-0.3cm}\item Ball x Torque: $\tau_x$
+   \vspace{-0.3cm}\item Ball y Torque: $\tau_y$
 \end{itemize}
+
+Note, that in order to simplify the modeling, we use perpendicular torques
+acting on the ball, in practical application, three linearly dependent torques
+are actually used. These are equivalent however their relation is not explicitly
+defined by this document.
 
 \section{Definition of States}
 \begin{figure}[h!]
@@ -60,30 +44,40 @@ Aa
   \label{fig:unicycle_states}
 \end{figure}
 
-This state, $x$ can be written in column vector form:
+These states, are grouped into a set of generalized coordinates,
+$q = [x, y, \theta, \phi]$ and then combined to form the full state of the
+system.
+
+$$ \state = 
+  \bmat{q \\ \dot{q}} =
+  \begin{bmatrix}
+    x            \\
+    y            \\
+    \theta       \\
+    \phi         \\
+    \dot{x}      \\
+    \dot{y}      \\
+    \dot{\theta} \\
+    \dot{\phi}   \\
+  \end{bmatrix}
 $$
-x = \begin{bmatrix}
-  x            \\
-  y            \\
-  \theta       \\
-  \phi         \\
-  \Omega       \\
-  \alpha       \\
-  \dot{x}      \\
-  \dot{y}      \\
-  \dot{\theta} \\
-  \dot{\phi}   \\
-  \omega       \\
-  \dot{\alpha} \\
-\end{bmatrix}$$
+
+The inputs are represented as a vector $u = \bmat{\tau_x \\ \tau_y}$
 
 \section{Derivation of State Derivatives}
 
-When calculating $\dot{x}$, the states can be divided into two set. The first
-set of states are those which can be easily passed through in the state space 
-model, i.e $\dot{x} \rightarrow \dot{x}$. The second set, requires an equation
-based on the first and second set. i.e $\ddot{x} = ?$. For this, some constants
-will be defined. $r$ is the radius of the wheel.
+Recalling the definition of a non-linear time-invariant system, they take the
+form $\dot{\state} = f(\state, u)$. When calculating $\dot{\state}$ is is
+helpful to think of the state as $\dot{\state} = \bmat{\dot{q} \\ \ddot{q}}$.
+From this form, one can see that when defining a function that goes from
+$\state \rightarrow \dot{\state}$ the $\dot{q}$ states are shared on both sides,
+and one only needs to find some function which takes in $q$ and $\dot{q}$
+and returns $\ddot{q}$.
+
+The derivation of thus function will be achieved through lagrangian mechanics.
+Recall that lagrangian mechanics constructs a function, called the lagrangian
+defined as the difference between the kinetic and potential energies of a system
+, $\mathcal{L} = T - U$ where $L$ 
 
 \paragraph{Positional Vectors $\ddot{x}$ and $\ddot{y}$}
 Calculating these linear accelerations is possible by splitting the linear 

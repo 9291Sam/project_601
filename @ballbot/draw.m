@@ -46,6 +46,6 @@ function draw(sys, x)
         
         drawnow; 
         
-        pause(1/60); 
+        pause(1/240); 
     end
 end

@@ -1,378 +1,187 @@
-==> ./@unicycle/simulate_no_input.m <==
-function [x] = simulate_no_input(sys, t, x0)
+==> ./@ballbot/static_state_feedback.m <==
+function [x] = static_state_feedback(sys,t,x0,K,xtilde,utilde)
 
-[~, x] = ode45(@(t, x) sys.dynamics_no_input(x), t, x0);
+u = @(x) utilde - K*(x - xtilde);
 
+[~,x] = ode45(@(t,x) sys.dynamics(x,u(x)),t,x0);
 
 end
-==> ./@unicycle/draw.m <==
+==> ./@ballbot/linearize.m <==
+function [A, B] = linearize(sys,x,u)
+    zero_x = zeros(size(x));
+    zero_u = zeros(size(u));
+    if (isequal(zero_x(3:end), x(3:end)) && isequal(zero_u, u))
+        A = get_A_matrix(sys.r, sys.d, sys.m_ball, sys.m_body, sys.I_ball, sys.I_body_xy, sys.I_body_z, sys.g);
+        B = get_B_matrix(sys.r, sys.d, sys.m_ball, sys.m_body, sys.I_ball, sys.I_body_xy, sys.I_body_z, sys.g);
+    else
+        x
+        u
+        error("Can't linearize around given x and u!");
+    end
+
+end
+==> ./@ballbot/dynamics.m <==
+function dx = dynamics(sys, state, input)
+
+if nargin < 2
+    state = zeros(sys.num_states,1);
+end
+if nargin < 3
+    input = zeros(sys.num_inputs,1);
+end
+
+    new_states = ballbot_dynamics(...
+        state(1), state(2), state(3), state(4), state(5), state(6), state(7), state(8),...
+        input(1), input(2),...
+        sys.r, sys.d, sys.m_ball, sys.m_body, sys.I_ball, sys.I_body_xy, sys.I_body_z, sys.g...
+    );
+
+    dx = [state(5:8); new_states];
+end
+==> ./@ballbot/draw.m <==
 function draw(sys, x)
+    f = figure("Position", [100, 100, 1920, 1620]);
+    clf;
 
-f = figure();
-clf;
+    grid on;
+    hold on;
+    axis equal;
+    axis([-4 4 -4 4 0 4]); 
+    axis manual; 
+    axis vis3d;
 
-grid on;
-hold on;
-axis equal;
-axis([-8 8 -8 8 0 8]); 
-axis manual; 
-axis vis3d;
+    view(3);            
+    xlabel('X'); ylabel('Y'); zlabel('Z');
+    plot3(0, 0, 0, 'kx', 'MarkerSize', 15, 'LineWidth', 2); % root marker
 
-view(3);            
-xlabel('X'); ylabel('Y'); zlabel('Z');
-plot3(0, 0, 0, 'kx', 'MarkerSize', 15, 'LineWidth', 2);
+    ball_radius = sys.r;
+    body_length = sys.d * 2;
 
-
-
-wheel_center_seat_distance = sys.d;
-wheel_radius = sys.r;
-wheel_width = 0.25;
-
-unicycle_root_transform = hgtransform; 
-
-% Seat Line
-seat_transform = hgtransform('Parent', unicycle_root_transform);
-plot3([0, 0], [0, 0], [0, wheel_center_seat_distance], 'LineWidth', 4, 'Color', 'r', 'Parent', seat_transform);
-
-% Wheel
-wheel_transform = hgtransform('Parent', unicycle_root_transform);
-wheel_xrotated_pi2 = hgtransform('Parent', wheel_transform);
-set(wheel_xrotated_pi2, 'Matrix', makehgtform('xrotate', pi/2));
-[xc, yc, zc] = cylinder(wheel_radius, 30);
-zc = zc * wheel_width - (wheel_width/2);
-surf(xc, yc, zc, 'Parent', wheel_xrotated_pi2, 'FaceColor', [0.2 0.2 0.2], 'EdgeColor', 'none'); 
-% Wheel Spoke
-plot3([0 0], [0 wheel_radius], [0 0], 'LineWidth', 3, 'Color', 'b', 'Parent', wheel_xrotated_pi2);
+    ballbot_root_transform = hgtransform; 
+    body_transform = hgtransform('Parent', ballbot_root_transform);
 
 
-last_valid_k = 1;
+    % Ball geometry
+    [sx, sy, sz] = sphere(20);
+    sx = sx * ball_radius;
+    sy = sy * ball_radius;
+    sz = sz * ball_radius;
+    surf(sx, sy, sz, 'Parent', ballbot_root_transform, 'FaceColor', [0.8 0.8 0.8], 'EdgeColor', [0.5 0.5 0.5]);
 
-for k = 1:size(x,1)
+    % Body geometry　% TODO: should this be a cylinder
+    plot3([0, 0], [0, 0], [0, body_length], 'LineWidth', 6, 'Color', 'r', 'Parent', body_transform);
 
-    % if (abs(x(k, 4)) < pi/2 && abs(x(k, 6)) < pi/2)
-        last_valid_k = k;
-    % end
-
-
-    % rendering
-    x_pos = x(last_valid_k, 1);
-    y = x(last_valid_k, 2);
-    theta = x(last_valid_k, 3); % tangent to a circle
-    phi = x(last_valid_k, 4);
-    Omega = x(last_valid_k, 5);
-    alpha = x(last_valid_k, 6);
-    
-    T_pos  = makehgtform('translate', [x_pos, y, wheel_radius * cos(phi)]);
-    T_yaw  = makehgtform('zrotate', theta);
-    T_lean = makehgtform('xrotate', phi);
-    
-    % Handles x, y, theta, and phi
-    set(unicycle_root_transform, 'Matrix', T_pos * T_yaw * T_lean);
-    
-    set(wheel_transform, 'Matrix', makehgtform('yrotate', Omega));
-
-    set(seat_transform, 'Matrix',  makehgtform('yrotate', alpha))
-    
-    disp("rendering state");
-    x(k, :)
-    drawnow; pause(1/30)
+    for k = 1:size(x,1)
+        x_pos = x(k, 1);
+        y_pos = x(k, 2);
+        theta = x(k, 3); 
+        phi   = x(k, 4);         
+        
+        T_translate = makehgtform('translate', [x_pos, y_pos, ball_radius]);
+        set(ballbot_root_transform, 'Matrix', T_translate);
+        
+        T_pitch = makehgtform('yrotate', theta);
+        T_roll  = makehgtform('xrotate', phi);
+        
+        set(body_transform, 'Matrix', T_pitch * T_roll);
+        
+        drawnow; 
+        
+        pause(1/60); 
+    end
 end
+==> ./@ballbot/simulate.m <==
+function [x] = simulate(sys,t,x0)
 
-
+[~,x] = ode45(@(t,x) sys.dynamics(x),t,x0);
 
 end
-==> ./@unicycle/eom_deriver.m <==
-function eom_deriver()
-% https://github.com/MatthewPeterKelly/Lagrange_Mechanics_Derivations
-% https://github.com/MatthewPeterKelly/Lagrange_Mechanics_Derivations/blob/28680024833fe3dd00af9d1ec23644b6f3d4de87/springCartPole/EoM_Spring_Cart_Pole.m
+==> ./@ballbot/observed_trajectory_tracked.m <==
+function x = observed_trajectory_tracked(sys, t_span, x0, K, r, L, C, D)
 
-syms x y theta phi Omega 'real';
-alpha = sym('alpha', 'real');
-syms dotx doty dottheta dotphi dotOmega dotalpha 'real';
-syms ddotx ddoty ddottheta ddotphi ddotOmega ddotalpha 'real';
+plant = @(x, u) sys.dynamics(x, u);
 
-q  = [x; y; theta; phi; Omega; alpha];
-dq = [dotx; doty; dottheta; dotphi; dotOmega; dotalpha];
-ddq = [ddotx; ddoty; ddottheta; ddotphi; ddotOmega; ddotalpha];
+observer = @(xhat, y, u) sys.dynamics(xhat, u) - L*(y-C*xhat-D*u);
 
-% t_1 - wheel pitch
-% t_2 - seat roll
-% t_3 - seat pitch
-syms t_1 t_2 t_3 'real';
+output = @(x, u) C*x+D*u;
+
+controller = @(t, x) -K*(x - r(t));
 
 
-% r          - wheel radius
-% d          - distance between fork and hub
-% m_w        - wheel mass
-% m_s        - seat mass
-% I_wpitch   - Wheel pitch moment
-% I_wyawroll - Wheel roll moment
-% g          - gravitational constant
-syms r d m_w m_s I_wpitch I_wyawroll g 'real'; 
-
-local_wheel_inertias = [I_wyawroll 0 0; 0 I_wpitch 0; 0 0 I_wyawroll];
-
-% Order of rotations. 
-% {alpha / omega} -> phi -> theta -> world
-
-% these matrices bring things into global space from the local spaces
-Rz_theta = [
-    cos(theta) -sin(theta) 0; 
-    sin(theta) cos(theta)  0;
-    0          0           1
-];
-
-rotate_by_theta = Rz_theta;
-
-Rx_phi = [
-    1 0        0;
-    0 cos(phi) -sin(phi);
-    0 sin(phi) cos(phi);
-];
-
-rotate_by_phi = Rx_phi;
-
-Ry_alpha = [
-    cos(alpha)  0 sin(alpha);
-    0           1 0;
-    -sin(alpha) 0 cos(alpha);
-];
-
-rotate_by_alpha = Ry_alpha;
-
-% global origin -> unicycle_base
-root = [x; y; 0];
-
-% vector between global origin -> wheel center
-wheel_hub_global_pos = root + rotate_by_theta * rotate_by_phi * [0; 0; r];
-% global origin -> seat center
-seat_global_pos = wheel_hub_global_pos + rotate_by_theta * rotate_by_phi * rotate_by_alpha * [0; 0; d];
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% lagrangian shit
-
-% time derivative & chain rule 
-% jacobian(wheel_hub_global_pos, q): 
-wheel_hub_global_velocity = jacobian(wheel_hub_global_pos, q) * dq;
-seat_global_velocity      = jacobian(seat_global_pos, q) * dq;
-
-% T = 0.5 m v^2
-T_wheel_translation = 0.5 * m_w * (wheel_hub_global_velocity.'*wheel_hub_global_velocity);
-T_seat_translation = 0.5 * m_s * (seat_global_velocity.'*seat_global_velocity);
+    global counter;
 
 
+function f = full_dynamics(plant, observer, controller, output, x, xhat, t)
 
+    counter = counter + 1
+    disp("dynamics");
 
-% bring rotations into global space, then put them in the frame of the wheel
-wheel_yaw_world = [0; 0; dottheta];
-wheel_roll_world = Rz_theta * [dotphi; 0; 0];
-wheel_pitch_world = Rz_theta * Rx_phi * [0; dotOmega; 0];
-wheel_rotations_world = wheel_yaw_world + wheel_roll_world + wheel_pitch_world;
-global_rotations_to_wheel_local_rotations = (rotate_by_theta * rotate_by_phi).';
-wheel_rotations_local = global_rotations_to_wheel_local_rotations * wheel_rotations_world;
+u = controller(t, xhat);
+y = output(x, u);
 
-% 0.5 * w' J w
-T_wheel_rotation = 0.5 * wheel_rotations_local.' * local_wheel_inertias * wheel_rotations_local;
-
-
-U_wheel = m_w * g * wheel_hub_global_pos(3);
-U_seat = m_s * g * seat_global_pos(3);
-
-
-
-T = T_wheel_translation + T_seat_translation + T_wheel_rotation;
-U = U_wheel + U_seat;
-L = simplify(T - U);
-
-
-% Everything below is stolen straight from 
-% https://github.com/MatthewPeterKelly/Lagrange_Mechanics_Derivations/blob/28680024833fe3dd00af9d1ec23644b6f3d4de87/springCartPole/EoM_Spring_Cart_Pole.m
-% Lagrangian
-% ∂ = p
-% (d/dt)(pL/pdq) - (pL/pq) = generalized forces
-
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-%                  evaluate partial derivatives                           %
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-
-%              DL  
-%  DL_Dq  ==  ---      Note that 'D' is partial derivative here 
-%              Dq
-%
-DL_Dq = jacobian(L,q)';
-
-%              DL  
-%  DL_Ddq  ==  ---      Note that 'D' is partial derivative here 
-%              Ddq
-%
-DL_Ddq = jacobian(L,dq)';
-
-%                D  / DL  \         * Note that some of those 'd' should be
-% DDL_DtDdq  ==  -- | --  |         curvy 'D' to represent partial
-%                Dt \ Ddq /         derivatives
-%
-% Note the application of the chain rule:  (Quoting Andy Ruina: )
-%      d BLAH / dt  =  jacobian(BLAH, [q qdot])*[qdot qddot]'
-%
-DDL_DtDdq = jacobian(DL_Ddq,[q; dq]) * [dq; ddq];
-
-
-%Write out as single equation and simplify:
-EoM = DDL_DtDdq - DL_Dq; % TODO: why was this flipped in the example??
-EoM = simplify(EoM); 
-
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-%                   mass matrix gymnastics                                %
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-
-% This is a confusing step - read carefully:
-%
-% We know that our equations are of the form:
-%             EoM = M(q,dq)*qdd + f(q,dq) == 0;
-%
-% Thus, we can find M(q,dq) by using the jacobian command:
-
-M = jacobian(EoM,ddq);
-
-% Now, we want to find f(q,dq). We can do this by substituting in zero for
-% the acceleration vector (dqq)
-
-f = subs(EoM,ddq,sym([0; 0; 0; 0; 0; 0]));
-
-% https://www.mathworks.com/help/symbolic/sym.matlabfunction.html
-matlabFunction(M, "File", "getMassMatrix", "Vars", [q; dq; r; d; m_w; m_s; I_wpitch; I_wyawroll; g]);
-matlabFunction(f, "File", "getFVector", "Vars", [q; dq; r; d; m_w; m_s; I_wpitch; I_wyawroll; g]);
-
-% when simulating, n
-% EoM = M(q,dq)*qdd + f(q,dq) == 0;
-%  M(q,dq)*qdd == -f(q,dq);
-% qdd = M(q, dq)^-1 * -f(q, dq)
-
-% assuming input vector is a column vector [t_1; t_2; t_3]
-B = [
-    0 0 0;
-    0 0 0;
-    0 0 0;
-    0 1 0;
-    1 0 0;
-    0 0 1;
-];
-matlabFunction(B, "File", "getInputMatrix",  "Vars", [q; dq; r; d; m_w; m_s; I_wpitch; I_wyawroll; g]);
-
-% inputs
-% EoM = M(q,dq)*qdd + f(q,dq) == 0;
-% EoM = M(q,dq)*qdd + f(q,dq) == sum Q; (601 document) 
-% each tau is a vector 
-% Q = 
-
-% t_1 - torque on the wheel (pitch)
-% t_2 - torque on the seat (pitch)
-% t_3 - torque on the seat (roll)
-%https://farside.ph.utexas.edu/teaching/336k/Newton/node90.html
-
-% fuck ass constraints
-% dotx * sin(theta) - doty cos(theta) = 0
-% dotx * cos(theta) + doty sin(theta) = r * dotOmega
-
-
-%M(q, dq)ddq + f(q, dq) = Bu
-
-% row vectors because constraint * dq == 0
-lateral_constraint = [sin(theta), -cos(theta), 0, 0, 0, 0];
-rolling_constraint = [cos(theta), sin(theta), 0, 0, -r, 0];
-
-C = [
-    lateral_constraint;
-    rolling_constraint
-];
-% C * dq == 0
-C_eq0 = C * dq;
-time_derivative_c_eq0 = jacobian(C_eq0, [q; dq]) * [dq; ddq];
-gamma = subs(time_derivative_c_eq0, ddq, [0; 0; 0; 0; 0; 0]);
-
-matlabFunction(C, "File", "getConstraintMatrix", "Vars", [q; dq; r; d; m_w; m_s; I_wpitch; I_wyawroll; g]);
-matlabFunction(gamma, "File", "getConstraintGamma", "Vars", [q; dq; r; d; m_w; m_s; I_wpitch; I_wyawroll; g]);
+f = [ plant(x,u); observer(xhat,y,u) ];
 
 end
 
-
-
-==> ./@unicycle/dynamics_no_input.m <==
-function dx = dynamics_no_input(sys, x)
-
-
-
-
-% when simulating, n
-% EoM = M(q,dq)*qdd + f(q,dq) == 0;
-%  M(q,dq)*qdd == -f(q,dq);
-% qdd = M(q, dq)^-1 * -f(q, dq)
-
-
-M = getMassMatrix(x(1), x(2), x(3), x(4), x(5), x(6), x(7), x(8), x(9), x(10), x(11), x(12), sys.r, sys.d, sys.m_w, sys.m_s, sys.I_wpitch, sys.I_wyawroll, sys.g);
-f = getFVector(x(1), x(2), x(3), x(4), x(5), x(6), x(7), x(8), x(9), x(10), x(11), x(12), sys.r, sys.d, sys.m_w, sys.m_s, sys.I_wpitch, sys.I_wyawroll, sys.g);
-% B = getInputMatrix(x(1), x(2), x(3), x(4), x(5), x(6), x(7), x(8), x(9), x(10), x(11), x(12), sys.r, sys.d, sys.m_w, sys.m_s, sys.I_wpitch, sys.I_wyawroll, sys.g);
-C = getConstraintMatrix(x(1), x(2), x(3), x(4), x(5), x(6), x(7), x(8), x(9), x(10), x(11), x(12), sys.r, sys.d, sys.m_w, sys.m_s, sys.I_wpitch, sys.I_wyawroll, sys.g);
-gamma = getConstraintGamma(x(1), x(2), x(3), x(4), x(5), x(6), x(7), x(8), x(9), x(10), x(11), x(12), sys.r, sys.d, sys.m_w, sys.m_s, sys.I_wpitch, sys.I_wyawroll, sys.g);
-
-[n_constraints, ~] = size(C);
-
-left = [M, -C'; C, zeros(n_constraints)];
-right = [-f; -gamma];
-
-numerical_solution = left \ right; % might be the dumbest operator in existance
-
-dx(1:6) = x(7:12);
-dx(7:12) = numerical_solution(1:6);
-
-dx = dx';
+[~, x] = ode45(@(t, x) full_dynamics(plant, observer, controller, output, x(1:8), x(9:16), t), t_span, x0);
 
 end
-==> ./@unicycle/unicycle.m <==
-classdef unicycle
-    % The unicycle is a 12-dimensional nonlinear system with state
-    % [x; y; theta; phi; Omega; alpha; dotx; doty; dottheta; dotphi; omega; dotalpha]
-    % where:
-    %   x - Cartesian coordinate of the contact point of the unicycle's wheel to the ground
-    %   y - Cartesian coordinate of the contact point of the unicycle's wheel to the ground
-    %   theta - Angle between the unicycle's forward (+x) vector and the global (+x) vector
-    %   phi - Angle between the unicycle's vertical (+z) vector and the global
-    %   Omega - Angle spun by the wheel
-    %   alpha - Angle of the fork
+==> ./@ballbot/ballbot.m <==
+classdef ballbot
+    % A Ballbot is an 8-dimension nonlinear system with state
+    % [x; y; theta; phi; dx; dy; dtheta; dphi]
+    % where
+    % x - cartesian position of the contact point of the base of the ball
+    % y - cartesian position of the contact point of the base of the ball
+    % theta - rotation around the global y axis. +theta leans towards +X
+    % phi   - rotation around the global z axis. +phi leans towards -Y
 
-    % Order of Rotations
-    % {alpha, Omega} -> phi -> theta
+    % with constants
+    % r         - ball radius
+    % d         - distance between ball com & body com
+    % m_ball    - mass of the ball
+    % m_body    - mass of the body
+    % I_ball    - moment of inertia of the ball (spherically symmetrical)
+    % I_body_xy - moment of inertia of the body around the x&y axis
+    % I_body_z  - moment of inertia of the body around the z axis
+    % g         - gravitational constant
 
     properties
         num_states
         num_inputs
-        r
-        d
-        m_w
-        m_s
-        I_wpitch
-        I_wyawroll
-        g
+        r       
+        d       
+        m_ball  
+        m_body  
+        I_ball  
+        I_body_xy
+        I_body_z
+        g       
     end
 
     methods
-        function obj = unicycle()
-            obj.num_states = 12;
-            obj.num_inputs = 0;
+        function obj = ballbot()
+            obj.num_states = 8;
+            obj.num_inputs = 2;
 
-            obj.r = 0.5;
-            obj.d = 1.25;
-            obj.m_w = 5.0;
-            obj.m_s = 60;
-            obj.I_wpitch = 0.5 * obj.m_w * obj.r^2; % TODO: numbers pulled from the ether
-            obj.I_wyawroll = 0.25 * obj.m_w * obj.r^2;
+            obj.r = 0.1;
+            obj.d = 0.5;
+            obj.m_ball = 2.0;
+            obj.m_body = 10.0;
+            obj.I_ball = (2/5) * obj.m_ball * obj.r^2;
+            radius_body = obj.r * 1.25;
+            length_body = obj.d * 2;
+            obj.I_body_xy = (1/4) * obj.m_body * radius_body^2 + (1/12) * obj.m_body * length_body^2;
+            obj.I_body_z = (1/2) * obj.m_body * radius_body^2;
             obj.g = 10;
-
-            % eom_deriver();
         end
     end
+end
+==> ./@ballbot/trajectory_tracked_static_state_feedback.m <==
+function [x] = trajectory_tracked_static_state_feedback(sys,t_span,x0,K,r)
 
-    methods (Static)
-        eom_deriver()
-    end
+    u = @(t, x) -K*(x - r(t));
+
+    [~,x] = ode45(@(t,x) sys.dynamics(x,u(t, x)),t_span,x0);
+
 end
