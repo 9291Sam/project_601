@@ -45,7 +45,7 @@ defined by this document.
 \end{figure}
 
 These states, are grouped into a set of generalized coordinates,
-$q = [x, y, \theta, \phi]$ and then combined to form the full state of the
+$q = [x, y, \theta, \phi]\top$ and then combined to form the full state of the
 system.
 
 $$ \state = 
@@ -66,20 +66,123 @@ The inputs are represented as a vector $u = \bmat{\tau_x \\ \tau_y}$
 
 \section{Derivation of State Derivatives}
 
-Recalling the definition of a non-linear time-invariant system, they take the
-form $\dot{\state} = f(\state, u)$. When calculating $\dot{\state}$ is is
-helpful to think of the state as $\dot{\state} = \bmat{\dot{q} \\ \ddot{q}}$.
-From this form, one can see that when defining a function that goes from
-$\state \rightarrow \dot{\state}$ the $\dot{q}$ states are shared on both sides,
-and one only needs to find some function which takes in $q$ and $\dot{q}$
-and returns $\ddot{q}$.
+A general nonlinear time-invariant system is defined as
+$\dot{\state} = f(\state, u)$, however for the purposes of this document, it is
+more helpful to think in the form
+$$\dot{\state} = \bmat{\dot{q} \\ \ddot{q}} = f(q, \dot{q})$$
 
-The derivation of thus function will be achieved through lagrangian mechanics.
-Recall that lagrangian mechanics constructs a function, called the lagrangian
-defined as the difference between the kinetic and potential energies of a system
-, $\mathcal{L} = T - U$ where $L$ 
+Upon inspection, one can see that both sides of the equation share the state 
+$\dot{q}$, showing that one just needs to find a function
+$\ddot{q} = f(q, \dot{q}, u)$ which models the dynamics of the system.
 
-\paragraph{Positional Vectors $\ddot{x}$ and $\ddot{y}$}
+The derivation of thus function will be achieved through the use of lagrangian
+mechanics. Lagrangian mechanics constructs a function, called the lagrangian
+defined as the difference between the kinetic energies $T$ and potential 
+energies $U$ of a system:
+$$ \mathcal{L} = T - U$$
+
+For the ballbot system, the total kinetic energy is the sum of the translational
+and rotational energy of both the ball and the body. Meanwhile, the total
+potential energy is defined as the sum of the gravitational potential energy of 
+the ball and the body. 
+
+By combining this, we can state the full lagrangian as:
+$\mathcal{L} = 
+  (E_{ball, translation} + E_{ball, angular} + E_{body, translation} + E_{body, angular})-
+  (E_{ball, height} + E_{body, height})
+$
+
+\subsection{Derivation of translational energies} \label{der_translation}
+
+The translational kinetic energy of any rigid body is defined by the velocity
+of its center of mass. While the scalar form $E = \frac{1}{2} m * v^2$ is 
+familiar, in the context of this document, it will need to be extended into the
+vector case. This more general equation is written:
+$$E = \frac{1}{2} m *  v^\top * v$$
+
+In our case, defining these velocities is tricky, so we rely on the fact that
+the time derivative of the position vector is the velocity vector. This final
+equation is written:
+$$E = \frac{1}{2} m *  \dot{p}^\top * \dot{p}$$
+
+where $p$ is the position vector in the frame of the object. This general
+formulation allows us to derive the translational energy of an object from it's
+position vector.
+
+\paragraph{Translational energy of the ball}
+
+Starting off with the position of the ball, it can be easily seen that the
+position of the center of mass of the ball will be the sum of the position of
+it's base plus the radius of the ball upwards. 
+$$p_{ball} = \bmat{x \\ y \\ 0} + \bmat{x \\ y \\ r} = \bmat{x \\ y \\ r}$$
+
+Taking the time derivative of this vector yields 
+$$v_{ball} = \dot{p}_{ball} = \bmat{\dot{x} \\ \dot{y} \\ 0}$$
+
+Finally, this can be inputted into the translational energy formula to arrive at
+$$E_{ball, translation} = \frac{1}{2} m *  v_{ball}^\top * v_{ball}$$
+
+\paragraph{Translational energy of the body}
+
+The position of the body's center of mass is more complex as it depends not only
+on the position of the ball, but also on the angles of the body ($\theta$ and
+$\phi$) and the distance between the ball's center of mass and the body's center
+of mass ($d$)
+
+However, the rotation of the body is defined by the rotation matrix sequence
+of rotating around the X axis an angle $\phi$ followed by a rotation around
+the Y axis an angle $\theta$. These orations can be codified in the rotation 
+matrices:
+$$
+R_{body} = R_y(\theta) R_x(\phi) = 
+\bmat{
+\cos\theta & 0 & \sin\theta \\ 
+0 & 1 & 0 \\ 
+-\sin\theta & 0 & \cos\theta 
+}
+\bmat{ 
+1 & 0 & 0 \\ 
+0 & \cos\phi & -\sin\phi \\ 
+0 & \sin\phi & \cos\phi 
+}
+$$
+
+By using these matrices, one can easily calculate the position of the center
+of mass of the body as
+$$p_{body} = p_{ball} + R_{body} \bmat{ 0 \\ 0 \\ d }$$
+
+Therefore, using the same method as established previously, one can calculate
+the velocity as the time derivative of the position vector. Do note that, 
+because of the chain rule, and the resulting expression being dependent on 
+$\theta$ and $\phi$ that the jacobian should be used in the form
+$$v_{body} = \frac{d p_{body}}{dt} = \frac{\partial p_{body}}{\partial q} \frac{\partial q}{\partial t}$$
+
+Resulting in a similar relation of
+$$E_{body, translation} = \frac{1}{2} m *  v_{body}^\top * v_{body}$$
+
+\subsection{Derivation of angular energies}
+
+In a similar method as in \ref{der_translation}, one can start with the equation
+for the angular energy and similarly extend it to multiple. The scalar form is
+$E = \frac{1}{2} I \omega^2$ where $I$ is the moment of inertia of the spinning
+body and $\omega$ is the angular velocity of that body. In the vector case,
+this similarly transforms into 
+$$E = \frac{1}{2} \omega^\top * I * \omega$$. 
+
+\paragraph{Rotational energy of the ball}
+
+Since the ball never slips on the ground, it's angular velocity is directly
+derived from the linear velocity of the ball. For a ball of radius $r$, motion
+in the +X axis, induces a rotation around the +y axis. And, similarly, 
+motion in the +y axis induces a rotation round the -x axis because of the right
+handed axes being used. Therefore,
+
+$$\omega_{ball} = \bmat{-\dot{y}/r \\ \dot{x}/r \\ 0}$$
+
+\paragraph{}
+
+
+
 Calculating these linear accelerations is possible by splitting the linear 
 distance function into its components via $\theta$ and then repeatedly deriving
 with respect to linear Additionally, on inspection we can see that angular
