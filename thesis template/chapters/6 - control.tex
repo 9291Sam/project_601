@@ -13,43 +13,45 @@ robot will move too quickly and fall over. On the other hand, if the controller
 focuses too much on angle, it won't fall over, but the path traced will be
 incorrect.
 
-\section{Definition of the reference function}
+\section{Definition of figure eight reference function}
 
 A reference signal is function that evaluates to a desired state of the system.
 First, recall that the state vector is
 $\state = \bmat{x&y&\theta&\phi&\dot{x}&\dot{y}&\dot{\theta}&\dot{\phi}}^\top$. 
 Second, we can see, upon inspection that the only states which matter in a 
-figure eight pattern are the $x$ and $y$ states of the base of the robot. 
+figure eight pattern are the $x$ and $y$ states of the base of the robot.
 
-In order to derive the equation for this path, one can first start with the 
-parametric form of a circle $(x, y) = (r * cos(\omega t), r*sin(\omega t))$ and
-what is a figure eight if not a circle where one component is twice the
-frequency of the other? This yeilds the final equation 
-$(x, y) = (r * cos(\omega t), 0,5*r*sin(2*\omega t))$
+In order to derive the equation for this path, we start with the parametric form
+of a circle of radius $r$ as $(x, y) = (r \cos(\omega t), r\sin(\omega t))$. From this form, one
+notices that the parametric form of a figure eight is related to the parametric
+form of a circle where one component moves at twice the speed over half the
+distance. This can be stated mathematically as 
+$$(x, y) = (r \cos(\omega t), 0.5 \cdot r\sin(2\omega t)).$$
 
-Finally, this can be written in the form of a function in matlab to represent
-$$\bmat{
-    r * cos(\omega t) \\
-    0.5 * r * sin(2 * \omega t) \\
+Finally, this can be written in the form of a desired state vector with respect
+to time ($t$)
+$$\state(t) = \bmat{
+    r \cos(\omega t) \\
+    0.5 r \sin(2 \omega t) \\
     0 \\ 
     0 \\
     0 \\ 
     0 \\
     0 \\ 
     0 \\
-}$$
+}.$$
 
 \section{Controller}
 
-In order to achieve this goal, we will use LQR and use gains that put a stronger
-weight on the $x$ and $y$ components in comparison to the other states, but 
-not have them be too large as to cause the robot to fall over.
+As before, when designing the observer, we will use LQR to place our poles.
+However, unlike before, we will put a stronger emphasis on the position as, 
+we don't partially care what the body angles are, only that they are not
+extreme enough to cause the ballbot to fall over.
 
 By trial and error, the gains we selected were
 $Q = 10 \cdot \text{diag}(10, 10, 1, 1, 1, 1, 1, 1)$ and $R = I_{2x2}$
 as they appeared to strike a nice balance between acceptable tracking of the 
 reference vector without the robot falling over.
-
 
 
 By using the built-in matlab function, I got a K matrix of
@@ -58,11 +60,98 @@ $$K = \bmat{
     3.1623 & 0 & 32.1665 & 0 & 4.2961 & 0 & 6.9921 & 0
 }$$
 
-This is used in stoic state feedback with the system with the input vector $u$
+This is used in static state feedback with the system with the input vector $u$
 being calculated as 
 $$u = -K(\hat{\state} - r)$$
 
 \section{Results}
 
+With all of that implemented, below in Figures 
+we demonstrate a figure eight with radius $r = 3.0$ and a period $\omega = 2\pi/5$
 
-results with a couple of graphs, do x and y position vs time
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.99\linewidth]{final_controlled_x.png}
+  \caption{Graph of the $x$ coordinate while a figure eight pattern is traced}
+  \label{fig:final_controlled_x}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.99\linewidth]{final_controlled_y.png}
+  \caption{Graph of the $y$ coordinate while a figure eight pattern is traced}
+  \label{fig:final_controlled_y}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.99\linewidth]{final_controlled_theta.png}
+  \caption{Graph of the $\theta$ coordinate while a figure eight pattern is traced}
+  \label{fig:final_controlled_theta}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.99\linewidth]{final_controlled_phi.png}
+  \caption{Graph of the $\phi$ coordinate while a figure eight pattern is traced}
+  \label{fig:final_controlled_phi}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.99\linewidth]{final_controlled_dotx.png}
+  \caption{Graph of the $\dot{x}$ coordinate while a figure eight pattern is traced}
+  \label{fig:final_controlled_dotx}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.99\linewidth]{final_controlled_doty.png}
+  \caption{Graph of the $\dot{y}$ coordinate while a figure eight pattern is traced}
+  \label{fig:final_controlled_doty}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.99\linewidth]{final_controlled_dottheta.png}
+  \caption{Graph of the $\dot{\theta}$ coordinate while a figure eight pattern is traced}
+  \label{fig:final_controlled_dottheta}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.99\linewidth]{final_controlled_dotphi.png}
+  \caption{Graph of the $\dot{\phi}$ coordinate while a figure eight pattern is traced}
+  \label{fig:final_controlled_dotphi}
+\end{figure}
+
+
+\chapter{Conclusion}
+
+In conclusion, even thought I was forced to change my system at basically the 
+last possible moment, I still feel that I was able to put together a project
+which works and I understand. 
+
+Before this project, I had always had a general distaste for Matlab as a
+programming language, however I actually understand its purpose now. I was
+previously evaluating it as a programming language when, in reality, it's 
+exactly what it says in the name, it's a place where you can type math as it
+appears in a math class and it will work. 
+
+Frankly, I enjoyed doing this a lot more than I thought I was going to and,
+even though I spent most of the time banging my head against the wall, I feel
+accomplished with what I have done.
+
+With that being said, I do think you should remove the unicycle from the list of
+suggested systems as it is just unfair. Maybe I was modeling it and approaching
+the problem wrong, but given that I was able to switch to the ballbot system and
+actually succeed in an extremely compressed time frame, I think the system is
+simply too complex to be accurately modeled and understood after this
+introductory class.

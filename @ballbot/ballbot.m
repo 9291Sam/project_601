@@ -39,11 +39,11 @@ classdef ballbot
             obj.d = 0.5;
             obj.m_ball = 2.0;
             obj.m_body = 10.0;
-            obj.I_ball = (2/5) * obj.m_ball * obj.r^2
+            obj.I_ball = (2/5) * obj.m_ball * obj.r^2;
             radius_body = obj.r * 1.25;
             length_body = obj.d * 2;
-            obj.I_body_xy = (1/4) * obj.m_body * radius_body^2 + (1/12) * obj.m_body * length_body^2
-            obj.I_body_z = (1/2) * obj.m_body * radius_body^2
+            obj.I_body_xy = (1/4) * obj.m_body * radius_body^2 + (1/12) * obj.m_body * length_body^2;
+            obj.I_body_z = (1/2) * obj.m_body * radius_body^2;
             obj.g = 10;
         end
     end

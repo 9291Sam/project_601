@@ -5,7 +5,7 @@ ballbot under various initial conditions.
 
 
 \section{No Deviation}
-The following are graphs show the ballbot stand perfectly still at its
+The following graphs show the ballbot stand perfectly still at its
 unstable equilibrium point, with initial state $\state = 0$. Both graphs are as expected, as
 although the equilibrium point is unstable, no deviations are made to cause the
 ballbot to move from it. 
@@ -49,9 +49,9 @@ rigorous simulation would have something in place to prevent this.
 Figures \ref{fig:uncontrolled_x_both_deviation}, 
 \ref{fig:uncontrolled_y_both_deviation}, 
 \ref{fig:uncontrolled_theta_both_deviation}, and
-\ref{fig:uncontrolled_dottheta_no_deviation} start with 
+\ref{fig:uncontrolled_dottheta_both_deviation} start with 
 $\state = \bmat{0&0&0.00001&0.0001&0&0&0&0}^\top$. At these initial conditions
-we can start to notice sone chaotic behavior arising from the interaction
+we can start to notice some chaotic behavior arising from the interaction
 between the nonlinear pendulum force and the linear kickback of the wheel from
 the falling body.
 
@@ -78,7 +78,7 @@ the falling body.
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.74\linewidth]{uncontrolled_dottheta_no_deviation.png}
+  \includegraphics[width=0.74\linewidth]{uncontrolled_dottheta_both_deviation.png}
   \caption{Graph of the $\dot{\theta}$ coordinate of the ballbot starting near its equilibrium state with a slight deviation to $\theta$ and $\phi$}
-  \label{fig:uncontrolled_dottheta_no_deviation}
+  \label{fig:uncontrolled_dottheta_both_deviation}
 \end{figure}

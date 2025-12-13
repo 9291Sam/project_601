@@ -65,11 +65,11 @@ The inputs are represented as $u = \bmat{\tau_x \\ \tau_y}$.
 A general nonlinear time-invariant system is defined as
 $\dot{\state} = f(\state, u)$, however for the purposes of this document, it is
 more helpful to think in the form
-$$\dot{\state} = \bmat{\dot{q} \\ \ddot{q}} = g(q, \dot{q}, u)$$.
+$$\dot{\state} = \bmat{\dot{q} \\ \ddot{q}} = f(q, \dot{q}, u)$$.
 
 Upon inspection, one can see that both sides of the equation share the state 
 $\dot{q}$, showing that one just needs to find a function
-$\ddot{q} = f(q, \dot{q}, u)$ which models the dynamics of the system as the
+$\ddot{q} = g(q, \dot{q}, u)$ which models the dynamics of the system as the
 $\dot{q}$ states can simply be passed through in $f$.
 
 The derivation of this function $g$ will be achieved through the use of lagrangian
@@ -123,7 +123,7 @@ $\phi$) and the distance between the ball's center and the body's center of mass
 
 However, the rotation of the body is defined by the rotation matrix sequence
 of rotating around the X axis an angle $\phi$ followed by a rotation around
-the Y axis an angle $\theta$. These orations can be codified in the rotation 
+the Y axis an angle $\theta$. These orientations can be codified in the rotation 
 matrices which map outwards from a local to a global frame
 $$
 R_{body} = R_y(\theta) R_x(\phi) = 
@@ -158,7 +158,7 @@ In a similar method as in \ref{der_translation}, one can start with the equation
 for the angular energy and similarly extend it to the vector case. The scalar
 form is $E = \frac{1}{2} I \omega^2$ where $I$ is the moment of inertia of the spinning
 body and $\omega$ is the angular velocity of that body. In the vector case,
-this similarly transforms into $$E = \frac{1}{2} \omega^\top * I * \omega$$. 
+this similarly transforms into $$E = \frac{1}{2} \omega^\top  I  \omega$$. 
 Where $I$ is the inertia matrix of the system. For our application,
 
 \paragraph{Rotational energy of the ball}
@@ -191,14 +191,14 @@ equation
 $$\omega_{body} = R_{body}^\top (\bmat{0 \\ \dot{\theta} \\ 0} + R_y(\theta)\bmat{\dot{\phi} \\ 0 \\ 0})$$
 
 and the energy relation
-$$T_{body, angular} = \frac{1}{2} \omega_{body}^\top * I_{body} * \omega_{body}$$
+$$T_{body, angular} = \frac{1}{2} \omega_{body}^\top I_{body} \omega_{body}$$
 where $I_{body} = \bmat{I_{bodyxy}&0&0\\0&I_{bodyxy}&0\\0&0&I_{bodyz}}$. 
 
 \subsection{Derivation of potential energies}
 
 The potential energies of the ball and the body can be calculated from the 
 formula for gravitational potential energy of a point mass of mass $m$ at a 
-height $h$ with gravitational acceleration $g$ as $E = m*g*h$.
+height $h$ with gravitational acceleration $g$ as $E = mgh$.
 
 Since we already calculated the position vectors of the ball and the body, 
 we can just access their $z$ component and use that in the formula.
@@ -226,7 +226,7 @@ transformation into our generalized coordinates $q$. As each affects both the
 rotation of the body angles and causes some push back from $F=\tau/r$, we
 need a matrix that maps between our inputs $u$ and $\mathcal{Q}$.
 The matrix that maps between this is 
-$$\mathcal{Q} = B_{input to generalized}*u = \bmat{0&-1/r \\ -1/r&0 \\ 0&1 \\ 1&0}
+$$\mathcal{Q} = B_{map}u = \bmat{0&-1/r \\ -1/r&0 \\ 0&1 \\ 1&0}
 \bmat{\tau_x \\ \tau_y}$$ and is derived using the same idea as was used in
 equation \ref{derive_rtf}
 
