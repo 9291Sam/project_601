@@ -1,28 +1,29 @@
 \chapter{Modeling}
 Although a ballbot is a fairly complex system, it can be thought of in various 
 ways. The most useful of which, will be as a inverted pendulum affixed atop a 
-cart. It's states can be seen from inspection of its movement, while state
-equations can be derived by using lagrangian mechanics to derive a continuous
-nonlinear time-invariant system.
+freely translatable card. It's states can be seen from inspection of its
+movement, while state equations will be derived using lagrangian mechanics
+to derive a continuous nonlinear time-invariant system $\dot{\state} = f(\state, u)$.
 
-Upon inspection we can note the following states, additionally shown in \ref{fig:unicycle_states}.
-\begin{itemize}
+Upon inspection we can note the following states, additionally shown in \ref{fig:ballbot_states}.
+\begin{itemize}   
    \vspace{-0.3cm}\item $x$ positional states: $x$ and $\dot{x}$
    \vspace{-0.3cm}\item $y$ positional states: $y$ and $\dot{y}$
    \vspace{-0.3cm}\item Pitch states: $\theta$ and $\dot{\theta}$
    \vspace{-0.3cm}\item Roll states: $\phi$ and $\dot{\phi}$
 \end{itemize}
 
-Additionally, we define the following constants that parametrize the simulation.
+Additionally, we define the following constants that parametrize the simulation,
+after each a typical value is given
 \begin{itemize}
-   \vspace{-0.3cm}\item Radius of the ball: $r$
-   \vspace{-0.3cm}\item Distance between center of mass of the ball ball and the center of mass of the body: $d$
-   \vspace{-0.3cm}\item Mass of the ball: $m_{ball}$
-   \vspace{-0.3cm}\item Mass of the body: $m_{body}$
-   \vspace{-0.3cm}\item Moment of the ball around all axes: $I_{ball}$
-   \vspace{-0.3cm}\item Moment of the body around the x and y axes: $I_{bodyxy}$
-   \vspace{-0.3cm}\item Moment of the body around the z axis: $I_{bodyz}$
-   \vspace{-0.3cm}\item Force of gravity: $g$
+   \vspace{-0.3cm}\item Radius of the ball: $r$ (0.1 m)
+   \vspace{-0.3cm}\item Distance between the ball and the center of mass of the body: $d$ (0.5 m)
+   \vspace{-0.3cm}\item Mass of the ball: $m_{ball}$ (2 kg)
+   \vspace{-0.3cm}\item Mass of the body: $m_{body}$ (10 kg)
+   \vspace{-0.3cm}\item Moment of the ball around all axes: $I_{ball}$ (0.008 $kgm^2$)
+   \vspace{-0.3cm}\item Moment of the body around the x and y axes: $I_{bodyxy}$ (0.8725 $kgm^2$)
+   \vspace{-0.3cm}\item Moment of the body around the z axis: $I_{bodyz}$ (0.078125 $kgm^2$)
+   \vspace{-0.3cm}\item Force of gravity: $g$ (10 $m/s^2$)
 \end{itemize}
 
 Finally, we define the following inputs to the system.
@@ -31,22 +32,17 @@ Finally, we define the following inputs to the system.
    \vspace{-0.3cm}\item Ball y Torque: $\tau_y$
 \end{itemize}
 
-Note, that in order to simplify the modeling, we use perpendicular torques
-acting on the ball, in practical application, three linearly dependent torques
-are actually used. These are equivalent however their relation is not explicitly
-defined by this document.
-
 \section{Definition of States}
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.403125\linewidth]{with states.png}
-  \caption{Drawing of a Unicycle with states}
-  \label{fig:unicycle_states}
+  \includegraphics[width=0.403125\linewidth]{with_states.png}
+  \caption{Drawing of a Ballbot with states $x$, $y$, $\theta$, and $\phi$ visible}
+  \label{fig:ballbot_states}
 \end{figure}
 
 These states, are grouped into a set of generalized coordinates,
-$q = [x, y, \theta, \phi]\top$ and then combined to form the full state of the
-system.
+$q = [x, y, \theta, \phi]^\top$ and then combined to form the full state of the
+system
 
 $$ \state = 
   \bmat{q \\ \dot{q}} =
@@ -59,23 +55,24 @@ $$ \state =
     \dot{y}      \\
     \dot{\theta} \\
     \dot{\phi}   \\
-  \end{bmatrix}
+  \end{bmatrix}.
 $$
 
-The inputs are represented as a vector $u = \bmat{\tau_x \\ \tau_y}$
+The inputs are represented as $u = \bmat{\tau_x \\ \tau_y}$.
 
 \section{Derivation of State Derivatives}
 
 A general nonlinear time-invariant system is defined as
 $\dot{\state} = f(\state, u)$, however for the purposes of this document, it is
 more helpful to think in the form
-$$\dot{\state} = \bmat{\dot{q} \\ \ddot{q}} = f(q, \dot{q})$$
+$$\dot{\state} = \bmat{\dot{q} \\ \ddot{q}} = g(q, \dot{q}, u)$$.
 
 Upon inspection, one can see that both sides of the equation share the state 
 $\dot{q}$, showing that one just needs to find a function
-$\ddot{q} = f(q, \dot{q}, u)$ which models the dynamics of the system.
+$\ddot{q} = f(q, \dot{q}, u)$ which models the dynamics of the system as the
+$\dot{q}$ states can simply be passed through in $f$.
 
-The derivation of thus function will be achieved through the use of lagrangian
+The derivation of this function $g$ will be achieved through the use of lagrangian
 mechanics. Lagrangian mechanics constructs a function, called the lagrangian
 defined as the difference between the kinetic energies $T$ and potential 
 energies $U$ of a system:
@@ -88,26 +85,21 @@ the ball and the body.
 
 By combining this, we can state the full lagrangian as:
 $\mathcal{L} = 
-  (E_{ball, translation} + E_{ball, angular} + E_{body, translation} + E_{body, angular})-
-  (E_{ball, height} + E_{body, height})
+  (T_{ball, translation} + T_{ball, angular} + T_{body, translation} + T_{body, angular})-
+  (U_{ball, height} + U_{body, height})
 $
 
 \subsection{Derivation of translational energies} \label{der_translation}
 
 The translational kinetic energy of any rigid body is defined by the velocity
-of its center of mass. While the scalar form $E = \frac{1}{2} m * v^2$ is 
-familiar, in the context of this document, it will need to be extended into the
-vector case. This more general equation is written:
-$$E = \frac{1}{2} m *  v^\top * v$$
+of its center of mass. While the scalar form $E = \frac{1}{2} m  v^2$ is 
+familiar, in the context of this document, it will extended into the vector
+case, written more generally as $$T = \frac{1}{2} m  v^\top v$$
 
-In our case, defining these velocities is tricky, so we rely on the fact that
-the time derivative of the position vector is the velocity vector. This final
-equation is written:
-$$E = \frac{1}{2} m *  \dot{p}^\top * \dot{p}$$
-
-where $p$ is the position vector in the frame of the object. This general
-formulation allows us to derive the translational energy of an object from it's
-position vector.
+In our case, defining these velocities is tricky, especially for the body,
+so we will rely on the fact that the time derivative of the position vector
+($p$)is the velocity vector. This final equation is written:
+$$T = \frac{1}{2} m \dot{p}^\top \dot{p}$$
 
 \paragraph{Translational energy of the ball}
 
@@ -120,19 +112,19 @@ Taking the time derivative of this vector yields
 $$v_{ball} = \dot{p}_{ball} = \bmat{\dot{x} \\ \dot{y} \\ 0}$$
 
 Finally, this can be inputted into the translational energy formula to arrive at
-$$E_{ball, translation} = \frac{1}{2} m_ball * v_{ball}^\top * v_{ball}$$
+$$T_{ball, translation} = \frac{1}{2} m_{ball} v_{ball}^\top v_{ball}$$
 
 \paragraph{Translational energy of the body}
 
 The position of the body's center of mass is more complex as it depends not only
 on the position of the ball, but also on the angles of the body ($\theta$ and
-$\phi$) and the distance between the ball's center of mass and the body's center
-of mass ($d$)
+$\phi$) and the distance between the ball's center and the body's center of mass
+($d$)
 
 However, the rotation of the body is defined by the rotation matrix sequence
 of rotating around the X axis an angle $\phi$ followed by a rotation around
 the Y axis an angle $\theta$. These orations can be codified in the rotation 
-matrices:
+matrices which map outwards from a local to a global frame
 $$
 R_{body} = R_y(\theta) R_x(\phi) = 
 \bmat{
@@ -144,7 +136,7 @@ R_{body} = R_y(\theta) R_x(\phi) =
 1 & 0 & 0 \\ 
 0 & \cos\phi & -\sin\phi \\ 
 0 & \sin\phi & \cos\phi 
-}
+}.
 $$
 
 By using these matrices, one can easily calculate the position of the center
@@ -158,29 +150,33 @@ $\theta$ and $\phi$ that the jacobian should be used in the form
 $$v_{body} = \frac{d p_{body}}{dt} = \frac{\partial p_{body}}{\partial q} \frac{\partial q}{\partial t}$$
 
 Resulting in a similar relation of
-$$E_{body, translation} = \frac{1}{2} m_body *  v_{body}^\top * v_{body}$$
+$$T_{body, translation} = \frac{1}{2} m_{body} v_{body}^\top v_{body}$$
 
 \subsection{Derivation of angular energies}
 
 In a similar method as in \ref{der_translation}, one can start with the equation
-for the angular energy and similarly extend it to multiple. The scalar form is
-$E = \frac{1}{2} I \omega^2$ where $I$ is the moment of inertia of the spinning
+for the angular energy and similarly extend it to the vector case. The scalar
+form is $E = \frac{1}{2} I \omega^2$ where $I$ is the moment of inertia of the spinning
 body and $\omega$ is the angular velocity of that body. In the vector case,
-this similarly transforms into 
-$$E = \frac{1}{2} \omega^\top * I * \omega$$. 
+this similarly transforms into $$E = \frac{1}{2} \omega^\top * I * \omega$$. 
+Where $I$ is the inertia matrix of the system. For our application,
 
 \paragraph{Rotational energy of the ball}
 
 Since the ball never slips on the ground, it's angular velocity is directly
 derived from the linear velocity of the ball. For a ball of radius $r$, motion
-in the +X axis, induces a rotation around the +y axis. And, similarly, 
+in the +x axis, induces a rotation around the +y axis. And, similarly, 
 motion in the +y axis induces a rotation round the -x axis because of the right
-handed axes being used. Therefore,
+handed axes being used. Therefore, because of $\tau = rF$ restated as
+$F=\tau/r$, one can see that
 
-$$\omega_{ball} = \bmat{-\dot{y}/r \\ \dot{x}/r \\ 0}$$
+\begin{equation} \label{derive_rtf}
+\omega_{ball} = \bmat{-\dot{y}/r \\ \dot{x}/r \\ 0}
+\end{equation}
 
-which results in the final energy equation
-$$E_{ball, angular} = \frac{1}{2} \omega_{ball}^\top * I_ball * \omega_{ball}$$. 
+which results in the final energy equation based on the scalar inertia of the
+ball since it is uniform regardless of axis
+$$T_{ball, angular} = \frac{1}{2} \omega_{ball}^\top I_{ball} \omega_{ball}$$. 
 
 
 \paragraph{Rotational energy of the body}
@@ -192,16 +188,17 @@ this is to bring all angles into the global coordinate frame, before
 transforming them back into the local space of the body. Doing so, yields the 
 equation
 
-$$\omega_{body} = R_{body}^\top (\bmat{0 \\ \dot{theta} \\ 0} + R_y(\theta)\bmat{\dot{\phi} \\ 0 \\ 0})$$
+$$\omega_{body} = R_{body}^\top (\bmat{0 \\ \dot{\theta} \\ 0} + R_y(\theta)\bmat{\dot{\phi} \\ 0 \\ 0})$$
 
 and the energy relation
-$$E_{body, angular} = \frac{1}{2} \omega_{body}^\top * I_body * \omega_{body}$$. 
+$$T_{body, angular} = \frac{1}{2} \omega_{body}^\top * I_{body} * \omega_{body}$$
+where $I_{body} = \bmat{I_{bodyxy}&0&0\\0&I_{bodyxy}&0\\0&0&I_{bodyz}}$. 
 
 \subsection{Derivation of potential energies}
 
 The potential energies of the ball and the body can be calculated from the 
 formula for gravitational potential energy of a point mass of mass $m$ at a 
-height $h$ with gravitational acceleration $g$  $E = m*g*h$.
+height $h$ with gravitational acceleration $g$ as $E = m*g*h$.
 
 Since we already calculated the position vectors of the ball and the body, 
 we can just access their $z$ component and use that in the formula.
@@ -209,8 +206,8 @@ Mathematically, this can be stated by taking the dot product with the third
 cartesian basis vector $\hat{k}$.
 
 Therefore the potential energy for both the ball and body can be expressed as
-$$E_{ball, height} = m_ball * g * (p_{ball} \cdot \hat{k})$$
-$$E_{body, height} = m_body * g * (p_{body} \cdot \hat{k})$$
+$$U_{ball, height} = m_{ball} g (p_{ball} \cdot \hat{k})$$
+$$U_{body, height} = m_{body} g (p_{body} \cdot \hat{k})$$
 
 \section{Formation of the equations of motion}
 
@@ -221,19 +218,22 @@ will be written as
 $$\frac{d}{dt} \frac{\partial \mathcal{L}}{\partial \dot{q}} -
 \frac{\partial \mathcal{L}}{\partial q} = \mathcal{Q}$$
 
-where $\mathcal{Q}$ are the generalized input forces of the system. However, in
-this case, our input forces are $\tau_x$ and $\tau_y$ which require a
-transformation into our generalized coordinates $q$
+where $\mathcal{Q}$ is the generalized input forces of the system. 
 
 \paragraph{Generalized Forces}
-The ballbot's inputs are modeled as two torques $\tau_x$ and $\tau_y$ which each
-affect both the rotation of the body angles and the position of the ball.
+In our case, we have two input forces are $\tau_x$ and $\tau_y$ which require a
+transformation into our generalized coordinates $q$. As each affects both the
+rotation of the body angles and causes some push back from $F=\tau/r$, we
+need a matrix that maps between our inputs $u$ and $\mathcal{Q}$.
 The matrix that maps between this is 
-$$\mathcal{Q} = B_{generalized}*u = \bmat{0&-1/r \\ -1/r&0 \\ 0&1 \\ 1&0} \bmat{\tau_x \\ \tau_y}$$
+$$\mathcal{Q} = B_{input to generalized}*u = \bmat{0&-1/r \\ -1/r&0 \\ 0&1 \\ 1&0}
+\bmat{\tau_x \\ \tau_y}$$ and is derived using the same idea as was used in
+equation \ref{derive_rtf}
 
 \paragraph{Equations of motion}
-This symbolic representation of the equations of motion can be symbolically solved to return
-a function $\ddot{q} = f(q, \dot{q})$. 
+Now that we have a representation of the lagrangian and the generalized input
+forces, this system can be solved symbolically to return the function $\ddot{q} = g(q, \dot{q})$ that
+we originally sought.
 
 Finally, the state update equation we sought $\dot{\state}$ can be calculated
-$$\dot{\state} = \bmat{\dot{q} \\ f(q, \dot{q})}$$
+$$\dot{\state} = \bmat{\dot{q} \\ g(q, \dot{q})}$$

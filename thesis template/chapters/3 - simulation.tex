@@ -5,8 +5,8 @@ ballbot under various initial conditions.
 
 
 \section{No Deviation}
-The following are graphs showing the ballbot stand perfectly still at its
-unstable equilibrium point, $\state = 0$. Both graphs are as expected as
+The following are graphs show the ballbot stand perfectly still at its
+unstable equilibrium point, with initial state $\state = 0$. Both graphs are as expected, as
 although the equilibrium point is unstable, no deviations are made to cause the
 ballbot to move from it. 
 
@@ -23,7 +23,7 @@ ballbot to move from it.
 Figures \ref{fig:uncontrolled_x_theta_deviation} and
 \ref{fig:uncontrolled_theta_theta_deviation} represent the ballbot starting with 
 $\state = \bmat{0&0&0.00001&0&0&0&0&0}^\top$. These behave mostly as expected,
-with two things of note. First, is the slight positive $x$ drive in 
+with two things of note. First, is the slight positive $x$ drift in 
 \ref{fig:uncontrolled_x_theta_deviation}, we assume this to be the result of
 simulation inaccuracy. Second, is the increasing angle of theta, which is odd
 but not a problem as we are not attempting to control the system. A more

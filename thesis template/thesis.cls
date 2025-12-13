@@ -175,8 +175,8 @@
     \vfill
     \begin{figure}[h!]
       \centering
-      \includegraphics[width=0.425\linewidth]{ballbot_patent.png}
-      \caption{Patent 7,847,504 B2\cite{ballbot_patent}}
+      \includegraphics[width=0.28\linewidth]{ballbot_patent_modified.png}
+      \caption{Patent 7,847,504 B2\cite{ballbot_patent}, modified to remove labels}
       \label{fig:ballbot_patent}
     \end{figure}
     \@school\\

@@ -2,74 +2,73 @@
 
 Linearization is the method of taking a time-invariant continuous-time system
 $\dot{\state} = f(\state, u)$ and approximating it as a linear time-invariant
-system of the form 
+system around some state and input of the form 
 $$\dot{\state} = A\state + Bu$$
 
 A linearization is calculated by evaluating the jacobian of the function $f$
-with respect to the state or the input. Put symbolically, given an equilibrium
+with respect to the state or input. Put symbolically, given an equilibrium
 state $\tilde{\state}$ and an equilibrium input $\tilde{u}$,
 $$A = \frac{\partial f}{\partial \state}(\tilde{\state}, \tilde{u})$$
 and
-$$B = \frac{\partial f}{\partial u}(\tilde{\state}, \tilde{u})$$
+$$B = \frac{\partial f}{\partial u}(\tilde{\state}, \tilde{u}).$$
 
-For the ballbot, this means calculating it's equilibrium points and the jacobian
+For the ballbot, this means calculating its equilibrium points and the jacobian
 of the full state update function.
 
 \section{Equilibrium points of the ballbot}
 
 Equilibrium points are defined as states where the system dynamics are
-stationary, implying $$\dot{\state} = f(\tilde{\state}, u) = 0$$
+stationary, implying $$\dot{\state} = f(\tilde{\state}, \tilde{u}) = 0$$
 
 From the definition of $f$ as calculated before, one can see that any
 equilibria point of the ballbot will be dependent on the state and the input.
 Looking first toward the state $\state = \bmat{x&y&\theta&\phi&\dot{x}&\dot{y}&\dot{\theta}&\dot{\phi}}^\top$
 
-In order for $\dot{\state} = 0$ to hold true the state must have its angles
+In order for $\dot{\state} = 0$ to remain true, the state must have its angles
 ($\theta$ and $\phi$), translational velocities ($\dot{x}$ and $\dot{y}$), and
 angular velocities ($\dot{\theta}$ and $\dot{\phi}$) all be equal to zero. 
 Interestingly, this means that the ballbot can be linearized around any vertical
-position, as all are reasonable.
+position, however, as we will see shortly, this will not affect the
+output $A$ and $B$ matrices.
 
 Moving onto the inputs, it's trivial to see that in order for $\dot{\state} = 0$
 to hold, $u = 0$ must be true. As any input would immediately knock the system
-out of the equilibria point
+out of the equilibria point.
 
 \section{Resultant A and B matrices}
 
 Using the above equations, one can pick a value for $\tilde{\state}$ and use
 it to calculate the $A$ and $B$ matrices. Doing this symbolically in Matlab,
 when combined with the derivation steps as derived earlier, results in the
-following matrices. Note the inclusion of the shared denominator defined
+following matrices for the choices of $\tilde{\state} = 0$ and $\tilde{u} = 0$.
+Note the inclusion of the shared denominator defined
 $ D = I_{ball}I_{xy} + I_{ball}m_{body}d^2 + I_{xy}m_{ball}r^2 + I_{xy}m_{body}r^2
-+ m_{ball}m_{body}r^2d^2 $
-
-$$
-A = \bmat{
++ m_{ball}m_{body}r^2d^2 $.
+$$A = \bmat{
   0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
   0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
   0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
   0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
-  0 & 0 & -\frac{m_{body}^2 g r^2 d^2}{\Delta} & 0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & \frac{m_{body}^2 g r^2 d^2}{\Delta} & 0 & 0 & 0 & 0 \\
-  0 & 0 & \frac{m_{body} g d (I_{ball} + m_{ball}r^2 + m_{body}r^2)}{\Delta} & 0 & 0 & 0 & 0 & 0 \\
-  0 & 0 & 0 & \frac{m_{body} g d (I_{ball} + m_{ball}r^2 + m_{body}r^2)}{\Delta} & 0 & 0 & 0 & 0
+  0 & 0 & -\frac{m_{body}^2 g r^2 d^2}{D} & 0 & 0 & 0 & 0 & 0 \\
+  0 & 0 & 0 & \frac{m_{body}^2 g r^2 d^2}{D} & 0 & 0 & 0 & 0 \\
+  0 & 0 & \frac{m_{body} g d (I_{ball} + m_{ball}r^2 + m_{body}r^2)}{D} & 0 & 0 & 0 & 0 & 0 \\
+  0 & 0 & 0 & \frac{m_{body} g d (I_{ball} + m_{ball}r^2 + m_{body}r^2)}{D} & 0 & 0 & 0 & 0
 }
 $$
-
 $$
 B = \bmat{
   0 & 0 \\
   0 & 0 \\
   0 & 0 \\
   0 & 0 \\
-  0 & -\frac{r(I_{xy} + m_{body}d^2 + m_{body}rd)}{\Delta} \\
-  \frac{r(I_{xy} + m_{body}d^2 + m_{body}rd)}{\Delta} & 0 \\
-  0 & \frac{I_{ball} + m_{ball}r^2 + m_{body}r^2 + m_{body}rd}{\Delta} \\
-  \frac{I_{ball} + m_{ball}r^2 + m_{body}r^2 + m_{body}rd}{\Delta} & 0
+  0 & -\frac{r(I_{xy} + m_{body}d^2 + m_{body}rd)}{D} \\
+  \frac{r(I_{xy} + m_{body}d^2 + m_{body}rd)}{D} & 0 \\
+  0 & \frac{I_{ball} + m_{ball}r^2 + m_{body}r^2 + m_{body}rd}{D} \\
+  \frac{I_{ball} + m_{ball}r^2 + m_{body}r^2 + m_{body}rd}{D} & 0
 }
 $$
 
 As expected from the equilibria derivation, the first two columns of the
-linearization are zeros implying that the linearization is independent of
-the state's $x$ and $y$ values. Additionally, note the one to one mapping
-of the $\dot{q}$ vectors in the upper right corner of the matrix.
+linearization are zeros implying that the linearization is independent of the
+state's $x$ and $y$. Also, we see the same one to one mapping of the $\dot{q}$
+vectors in the upper right corner of the matrix as in $f$

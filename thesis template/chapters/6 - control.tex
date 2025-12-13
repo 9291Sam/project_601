@@ -1,15 +1,17 @@
 \chapter{Control}
 
 The goal for this project was to create a demonstration of the ballbot moving
-in a figure eight pattern, while starting at some arbitrary position and with
-and observer, initialized to the zero state. Since the observer has already been
-defined, all that leaves is for the controller to be defined and for the 
-reference signal to be defined.
+in a figure eight pattern. More specifically, this means, starting the initial 
+$\state$ at some arbitrary position and angle and with an observer initialized
+to $\hat{\state} = 0$ Since the observer has already been
+defined, we still need to define the controller and the reference function for 
+the figure eight's path.
 
-A figure eight pattern requires a controller that creates a balance between
+The path traced by a figure eight is nontrivial and requires a balance between
 position and angle. If the controller focuses too much on the position, the
 robot will move too quickly and fall over. On the other hand, if the controller
-focuses too much on angle, it won't trace out the correct path.
+focuses too much on angle, it won't fall over, but the path traced will be
+incorrect.
 
 \section{Definition of the reference function}
 
