@@ -1,73 +1,75 @@
-\chapter{More}
+\chapter{Linearization}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{References and links}
-\label{sec:references}
+Linearization is the method of taking a time-invariant continuous-time system
+$\dot{\state} = f(\state, u)$ and approximating it as a linear time-invariant
+system of the form 
+$$\dot{\state} = A\state + Bu$$
 
-We use the \verb|hyperref| package to produce a pdf with hyperlinks. We also use the \verb|cleveref| package for facilitating references. Using the \verb|\cref| command will automatically use the correct prefix. You can also refer to multiple things at once by using multiple arguments, or you can refer to a range using \verb|\crefrange|. For more information, see the documentation\footnote{\url{http://mirrors.ctan.org/macros/latex/contrib/cleveref/cleveref.pdf}}.
+A linearization is calculated by evaluating the jacobian of the function $f$
+with respect to the state or the input. Put symbolically, given an equilibrium
+state $\tilde{\state}$ and an equilibrium input $\tilde{u}$,
+$$A = \frac{\partial f}{\partial \state}(\tilde{\state}, \tilde{u})$$
+and
+$$B = \frac{\partial f}{\partial u}(\tilde{\state}, \tilde{u})$$
 
-References can be cited with the \verb|\cite| command, which produces something like \cite{lessard16,lessard2015optimal,sundararajan2020analysis,tmm}. The \verb|cite| package ensures the citations are ordered nicely and compressed when possible.
+For the ballbot, this means calculating it's equilibrium points and the jacobian
+of the full state update function.
 
+\section{Equilibrium points of the ballbot}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Figures}
+Equilibrium points are defined as states where the system dynamics are
+stationary, implying $$\dot{\state} = f(\tilde{\state}, u) = 0$$
 
-We use the standard \verb|figure| environment for figures. Diagrams should be placed in separate files in the \texttt{graphics/} folder and should use the \texttt{standalone} package. You can then use \verb|includegraphics| as in \Cref{fig:sample} to include the figure in your document. If you are using \verb|pdflatex|, you can also use \verb|includegraphics| to include PDF, JPEG, PNG, or other formats, but not EPS.
+From the definition of $f$ as calculated before, one can see that any
+equilibria point of the ballbot will be dependent on the state and the input.
+Looking first toward the state $\state = \bmat{x&y&\theta&\phi&\dot{x}&\dot{y}&\dot{\theta}&\dot{\phi}}^\top$
 
-\begin{figure}[htb]
-	\centering
-	\pdftooltip{
-	\begin{tabular}{cc}
-		\includegraphics{text_figure} & \includegraphics{test_plot}
-	\end{tabular}}{%
-	Alternative text for accessibility.}
-	\caption{Figure captions should be long and descriptive because people actually read them, unlike the rest of the text. (Left) A block diagram make using Tikz. (Right) A plot made using Pgfplots. Note that the figures are not scaled, so the text size in the figures is consistent with the rest of the document. The source files for the figures are in the \texttt{graphics/} folder.}
-  \label{fig:sample}
-\end{figure}
+In order for $\dot{\state} = 0$ to hold true the state must have its angles
+($\theta$ and $\phi$), translational velocities ($\dot{x}$ and $\dot{y}$), and
+angular velocities ($\dot{\theta}$ and $\dot{\phi}$) all be equal to zero. 
+Interestingly, this means that the ballbot can be linearized around any vertical
+position, as all are reasonable.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Tables}
+Moving onto the inputs, it's trivial to see that in order for $\dot{\state} = 0$
+to hold, $u = 0$ must be true. As any input would immediately knock the system
+out of the equilibria point
 
-The \verb|booktabs| package, which includes commands such as \verb|\toprule|, \verb|\midrule|, and \verb|\bottomrule|, can be used to make nice tables. In general, never use vertical lines to separate columns. For more style tips on how to make nice tables, see\footnote{\url{https://people.inf.ethz.ch/markusp/teaching/guides/guide-tables.pdf}}. Here is an example of a nice table\footnote{\url{https://lazyscientist.wordpress.com/2021/07/23/make-better-tables-in-latex-using-booktabs/}}.
+\section{Resultant A and B matrices}
 
-\begin{table}[htbp]
-	\centering
-	\caption{Gravimetric analysis of silver halides in a 1.27-mL sample of sea water.}
-	  \begin{tabular}{lSSSSS}
-		  \toprule
-		  \multicolumn{1}{c}{} & \multicolumn{4}{c}{Test Tubes} & \multicolumn{1}{c}{} \\
-		  \cmidrule(rl){2-5} 
-			Qty of Sample                & {A}           & {B}           & {C}           & {D}    & {Avg}             \\
-		  \cmidrule(r){1-1} \cmidrule(rl){2-5} \cmidrule(l){6-6}
-			Mass (g)                     & 1.399         & 1.32          & 1.328         & 1.408  & 1.364           \\
-			Density (g/mL)               & 1.10          & 1.04          & 1.05          & 1.109  & 1.07            \\
-			Mass w/ Precipitate (g)      & 13.443        & 13.401        & 13.348        & {---}  & 13.397          \\
-			Mass AgCl (\num{e-2} g)      & 9.0           & 9.2           & 8.7           & {---}  & 8.9             \\
-			Moles AgCl (\num{e-4} mol)   & 6.28          & 6.42          & 6.08          & {---}  & 6.50            \\
-		  \bottomrule
-	  \end{tabular}
-	\label{tab:grav4}
-\end{table}
+Using the above equations, one can pick a value for $\tilde{\state}$ and use
+it to calculate the $A$ and $B$ matrices. Doing this symbolically in Matlab,
+when combined with the derivation steps as derived earlier, results in the
+following matrices. Note the inclusion of the shared denominator defined
+$ D = I_{ball}I_{xy} + I_{ball}m_{body}d^2 + I_{xy}m_{ball}r^2 + I_{xy}m_{body}r^2
++ m_{ball}m_{body}r^2d^2 $
 
+$$
+A = \bmat{
+  0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+  0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+  0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+  0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+  0 & 0 & -\frac{m_{body}^2 g r^2 d^2}{\Delta} & 0 & 0 & 0 & 0 & 0 \\
+  0 & 0 & 0 & \frac{m_{body}^2 g r^2 d^2}{\Delta} & 0 & 0 & 0 & 0 \\
+  0 & 0 & \frac{m_{body} g d (I_{ball} + m_{ball}r^2 + m_{body}r^2)}{\Delta} & 0 & 0 & 0 & 0 & 0 \\
+  0 & 0 & 0 & \frac{m_{body} g d (I_{ball} + m_{ball}r^2 + m_{body}r^2)}{\Delta} & 0 & 0 & 0 & 0
+}
+$$
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Code}
+$$
+B = \bmat{
+  0 & 0 \\
+  0 & 0 \\
+  0 & 0 \\
+  0 & 0 \\
+  0 & -\frac{r(I_{xy} + m_{body}d^2 + m_{body}rd)}{\Delta} \\
+  \frac{r(I_{xy} + m_{body}d^2 + m_{body}rd)}{\Delta} & 0 \\
+  0 & \frac{I_{ball} + m_{ball}r^2 + m_{body}r^2 + m_{body}rd}{\Delta} \\
+  \frac{I_{ball} + m_{ball}r^2 + m_{body}r^2 + m_{body}rd}{\Delta} & 0
+}
+$$
 
-We can include snippets of code when appropriate to describe specific computer code. A sample program in Julia is shown in \cref{code:label}. Note that this uses the \texttt{pygmentize} package in Python, which must both be installed in order to compile. Also, the code contains unicode characters, which must be defined (see the preamble of \texttt{thesis.tex}).
-
-% \begin{code}{julia}{A sample code listing. The method \texttt{rate} performs the automated algorithm analysis by searching for a Lyapunov function that bounds the rate of convergence of the performance measure.}{code:label}
-% m,L = 1,10                                   # parameters
-% α = 2/(L+m)                                  # stepsize
-
-% @algorithm begin
-% 	f = DifferentiableFunctional{Rⁿ}()       # objective function
-% 	xs = first_order_stationary_point(f)     # first-order stationary point
-% 	f' ∈ SectorBounded(m, L, xs, f'(xs))     # function class
-% 	x0 = Rⁿ()                                # initial point
-% 	x1 = x0 - α*f'(x0)                       # gradient descent
-% 	x0 => x1                                 # state update
-% 	performance = (x1-xs)^2                  # performance measure
-% end
-
-% rate(performance)                            # automated algorithm analysis
-% \end{code}
+As expected from the equilibria derivation, the first two columns of the
+linearization are zeros implying that the linearization is independent of
+the state's $x$ and $y$ values. Additionally, note the one to one mapping
+of the $\dot{q}$ vectors in the upper right corner of the matrix.

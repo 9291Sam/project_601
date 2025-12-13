@@ -1,0 +1,82 @@
+\chapter{Estimation}
+
+For feedback control to be implemented, one needs to have a measurement of the
+entire state, $\state$, of a system. When working with a purely mathematical
+simulation, this is trivial as one can simply access the desired state and use
+it. However, in practical application, the full state is often not directly
+available. Sensors can only sense some states therefore some type of estimation
+is needed to go from the possible to measure states to the impossible to 
+measure ones.
+
+\section{Observability of the ballbot}
+For example, without external tracking, there is no sensor that can measure
+$x$, $y$ without an external reference. $\dot{x}$ or $\dot{y}$ can be
+approximated via the use of optical sensors such as those in the bottom of a 
+computer mouse. $\theta$, $\phi$, $\dot{\theta}$ and $\dot{\phi}$ are the most
+measurable states because they can be measured with a gyroscope. One should note
+here that $\ddot{x}$ and $\ddot{y}$ can be measured by the use of an
+accelerometer, but those are not in the state. While this sounds like an
+insurmountable problem, in physical application, knowing the precise $x$ and $y$
+position isn't actually required, however the other ones are.
+
+
+The observability of ballbot is entirely dependent on the states that are 
+chosen as outputs (the $C$ matrix) or, in robotics terms, which states can be
+measured via onboard sensors. This can be done by finding the rank of the 
+observability matrix defined $$\mathcal{O} = \begin{bmatrix}
+    C \\
+    CA \\
+    CA^2 \\
+    \vdots \\
+    CA^{n-1}
+\end{bmatrix}$$
+
+\paragraph{Case 1: Position states $x$ and $y$} 
+Defining $C = \bmat{1&0&0&0&0&0&0&0\\0&1&0&0&0&0&0&0}$ we can solve for the
+observability matrix and find it to be 8, implying that the system is fully
+observable. Despite this, I was unable to get a simulation working with this
+restricted set of outputs.
+
+\paragraph{Case 2: Gyroscope measureable states $\theta$, $\phi$,
+$\dot{\theta}$ and $\dot{\phi}$} 
+By following the same method as above, defining 
+$C = \bmat{0&0&1&0&0&0&0&0\\0&0&0&1&0&0&0&0\\0&0&0&0&0&0&1&0\\0&0&0&0&0&0&0&1}$
+we can find the $rank(\mathcal{O})$ and determine it to be 6. Upon inspection 
+of the resultant matrix, one will find that only the $x$ and $y$ position
+states to be not observable, this combination are the states that one would
+select as the output for the system if one were creating a robot that needed 
+to move around
+
+\paragraph{Case 3: Hybrid states $x$, $y$, $\dot{\theta}$ and $\dot{\phi}$}
+For the purposes of this project, we have chosen the output matrix to be
+$C = \bmat{1&0&0&0&0&0&0&0\\0&1&0&0&0&0&0&0\\0&0&0&0&0&0&1&0\\0&0&0&0&0&0&0&1}$.
+This creates a balance where the system is both fully observable, is actually
+able to be simulated, and makes the observer fulfil a purpose as there are some 
+states that can only be estimated through the use of the observer. Since we
+do need to know the precise x and y positions for our desired figure 8 
+simulation
+
+\section{Design of the Observer}
+
+For this document, we will use a standard Luenberger Observer taking the form
+\begin{align*}
+    \dot{\hat{\state}} &= f(\hat{\state}, u) - L(y - \hat{y}) \\
+    \hat{y} &= C\hat{\state}
+\end{align*}
+where $L$ is the observer's gain. To select the observer's gain, we will use
+lqr. Selecting the gains was done by  trial and error and eventually resulted in
+state gains of $Q = 10 \cdot \text{diag}(1, 1, 25, 25, 1, 1, 5, 5)$ and input
+gains of $R = I_{4x4}$.
+
+After solving for this, the resultant gain matrix is
+$$
+L = \bmat{
+    4.3068 & 0 & -0.4276 & 0 \\
+    0 & 4.3068 & 0 & 0.4276 \\
+    -0.0898 & 0 & 16.8427 & 0 \\
+    0 & 0.0898 & 0 & 16.8427 \\
+    4.3657 & 0 & -13.7123 & 0 \\
+    0 & 4.3657 & 0 & 13.7123 \\
+    -0.4276 & 0 & 35.1644 & 0 \\
+    0 & 0.4276 & 0 & 35.1644
+}$$

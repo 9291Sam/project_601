@@ -175,9 +175,9 @@
     \vfill
     \begin{figure}[h!]
       \centering
-      \includegraphics[width=0.6\linewidth]{unicycle_patent.jpg}
-      \caption{Patent 3,083,036\cite{unicycle_self_powered}}
-      \label{fig:patent_unicycle}
+      \includegraphics[width=0.425\linewidth]{ballbot_patent.png}
+      \caption{Patent 7,847,504 B2\cite{ballbot_patent}}
+      \label{fig:ballbot_patent}
     \end{figure}
     \@school\\
     \@city, \@state\\ 

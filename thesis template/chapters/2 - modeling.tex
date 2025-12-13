@@ -120,7 +120,7 @@ Taking the time derivative of this vector yields
 $$v_{ball} = \dot{p}_{ball} = \bmat{\dot{x} \\ \dot{y} \\ 0}$$
 
 Finally, this can be inputted into the translational energy formula to arrive at
-$$E_{ball, translation} = \frac{1}{2} m *  v_{ball}^\top * v_{ball}$$
+$$E_{ball, translation} = \frac{1}{2} m_ball * v_{ball}^\top * v_{ball}$$
 
 \paragraph{Translational energy of the body}
 
@@ -158,7 +158,7 @@ $\theta$ and $\phi$ that the jacobian should be used in the form
 $$v_{body} = \frac{d p_{body}}{dt} = \frac{\partial p_{body}}{\partial q} \frac{\partial q}{\partial t}$$
 
 Resulting in a similar relation of
-$$E_{body, translation} = \frac{1}{2} m *  v_{body}^\top * v_{body}$$
+$$E_{body, translation} = \frac{1}{2} m_body *  v_{body}^\top * v_{body}$$
 
 \subsection{Derivation of angular energies}
 
@@ -179,168 +179,61 @@ handed axes being used. Therefore,
 
 $$\omega_{ball} = \bmat{-\dot{y}/r \\ \dot{x}/r \\ 0}$$
 
-\paragraph{}
+which results in the final energy equation
+$$E_{ball, angular} = \frac{1}{2} \omega_{ball}^\top * I_ball * \omega_{ball}$$. 
 
 
+\paragraph{Rotational energy of the body}
 
-Calculating these linear accelerations is possible by splitting the linear 
-distance function into its components via $\theta$ and then repeatedly deriving
-with respect to linear Additionally, on inspection we can see that angular
-acceleration will be linearly related to linear acceleration and the
-wheel's radius.
+The body's angular velocity, $\omega_{body}$ is similarly calculated from the 
+time derivatives of the body angles. Do note that the angles must end up in the
+local frame of the body with respect to the global axes. The easiest way to do
+this is to bring all angles into the global coordinate frame, before 
+transforming them back into the local space of the body. Doing so, yields the 
+equation
 
-Starting with the equation for the arc length of a wheel, $s = r\Omega$ where
-$s$ is the distance swept by a wheel of radius $r$ over an angle $\Omega$ (note
-the intentional reuse of $\Omega$). This equation can be derived, into the
-formula for the linear velocity of processing wheel $v = r\omega$ where $v$ is
-the velocity of the traveling wheel in the direction of motion and $\omega$ and
-$\dot{\Omega}$ are the angular velocities of the wheel. By splitting this
-equation into two based on components we arrive at
-\begin{align*}
-  v_x = \dot{x} &= r \cdot \omega \cdot \cos(\theta) \\
-  v_y = \dot{y} &= r \cdot \omega \cdot \sin(\theta) 
-\end{align*}
+$$\omega_{body} = R_{body}^\top (\bmat{0 \\ \dot{theta} \\ 0} + R_y(\theta)\bmat{\dot{\phi} \\ 0 \\ 0})$$
 
-Finally, the derivative of this set of equations can be taken one more time find
-the desired formula for linear acceleration.
-\begin{align*}
-  \ddot{x} &= r (\dot{\omega} \cos(\theta) - \omega \sin(\theta)\dot{\theta}) \\
-  \ddot{y} &= r (\dot{\omega} \sin(\theta) + \omega \cos(\theta)\dot{\theta})
-\end{align*}
+and the energy relation
+$$E_{body, angular} = \frac{1}{2} \omega_{body}^\top * I_body * \omega_{body}$$. 
 
-\paragraph{Rotation $\theta$}
-Upon inspection, one notices that $\theta$ only changes based off of $\phi$. In
-order for a unicycle to change it's $\theta$, the rider must lean to one side
-and change $phi$ first!
+\subsection{Derivation of potential energies}
 
-Imagine a unicycle balanced slightly over at an angle and going forward in its
-own local frame of reference. As it unicycle moves forward, it will rotate
-through $\theta$ tracing a perfect arc, dependent on the body angle $\phi$. By
-trying some values, it can be noticed that if an angle $\phi = 0$ the radius
-of the circle traces goes to infinity. Meanwhile, if the angle is larger, 
-something closer to $\phi = \pm \frac{\pi}{8}$, then theta will slowly change
-based on the current phi. 
+The potential energies of the ball and the body can be calculated from the 
+formula for gravitational potential energy of a point mass of mass $m$ at a 
+height $h$ with gravitational acceleration $g$  $E = m*g*h$.
 
-With this in mind, the formula for this arc is the turning radius ($r_t$) of a
-tilted. $r_t = \frac{r}{\sin(\phi)}$, the derivation of which is shown in
-\ref{fig:turn_radius_derivation}, can be used to relate $r_t$, $r$, and $\phi$.
-However, we now need a relation between $r_t$ and $\dot{\theta}$. This can be
-derived from the formula for arc length used previously. The formula
-$s = r\theta$, can once again be reinterpreted as $s = r_t\theta$ where $s$ the
-arc length of the turn radius that is swept by a wheel of radius $r$ traveling=
-over that arc an angle $\theta$. This means we can take the derivative of this
-formula to arrive at  $v = r_t\dot{theta}$. Finally, since we don't store the
-wheel's local forward velocity we can rewrite it in terms of angular
-acceleration as $\dot{\theta} = \frac{r\omega}{r_t}$. Now, by plugging in the
-formula derived earlier, we finally achieve
-$\dot{\theta} = \frac{r\omega\sin(\phi)}{r} = \omega\sin(\phi)$.
-Finally, by applying the product rule we can find the desired formula for
-$\ddot{\theta}$
+Since we already calculated the position vectors of the ball and the body, 
+we can just access their $z$ component and use that in the formula.
+Mathematically, this can be stated by taking the dot product with the third
+cartesian basis vector $\hat{k}$.
 
-$$\ddot{\theta} = \dot{\omega}\sin(\phi) + \omega \dot{\phi}\cos(\phi)$$
+Therefore the potential energy for both the ball and body can be expressed as
+$$E_{ball, height} = m_ball * g * (p_{ball} \cdot \hat{k})$$
+$$E_{body, height} = m_body * g * (p_{body} \cdot \hat{k})$$
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.525\linewidth]{derivation_turn_radius.png}
-  \caption{Drawing of a Unicycle with states}
-  \label{fig:turn_radius_derivation}
-\end{figure}
+\section{Formation of the equations of motion}
 
-\paragraph{Rotation $\phi$}
-Upon inspection, one notices that if perfectly balanced, a unicycle stands
-perfectly vertical it will stay there, however any slight perturbation will
-cause it to fall over. Additionally, the only perturbation that could cause this
-is the torque $\tau_2$ as every other input acts such that no matter its value,
-there will be no change on $phi$. 
+Using the relation derived above for the lagrangian, we now have the 
+lagrangian and can use it to derive our equations of motion. The equations of 
+motion are derived using the Euler-Lagrange equation, which for this document
+will be written as
+$$\frac{d}{dt} \frac{\partial \mathcal{L}}{\partial \dot{q}} -
+\frac{\partial \mathcal{L}}{\partial q} = \mathcal{Q}$$
 
-From this, assuming the unicycle is not moving forward, we can create a 
-simplified model of it. This is model in REFERENCE FIGURE. On this model, we 
-have the force of gravity acting at both the center of mass of the wheel and 
-on the rider. Additionally, we have a torque acting on the rider's center of
-mass. The gravitational forces can be split up into components along and
-perpendicular to the unicycle, with those along being canceled by the normal
-force of the unicycle. This leaves $F_{gravity, wheel} \sin(\phi)$, 
-$F_{gravity, rider} \sin(\phi)$ and $\tau_2$. By using newton's third law for
-rotation we see that the sum of torques $\sum \tau = I\alpha$ or, restated into
-the conventions of this document, $\sum = I \ddot{\phi}$ must be related. By
-combining all of these, we arrive at the formula
-$$I_{pivot} \ddot{\phi} = m_wrg\sin(\phi) + m_rg(r+d)\sin(\phi)+\tau_2$$
-where $I_{pivot} = m_wr + m_r(r+d)$ and is the moment corresponding to the pivot
-point being at the point of contact of the wheel.
+where $\mathcal{Q}$ are the generalized input forces of the system. However, in
+this case, our input forces are $\tau_x$ and $\tau_y$ which require a
+transformation into our generalized coordinates $q$
 
-This formula is accurate in the case of the unicycle when there is zero motion
-however once the unicycle starts to move, there are additional forces in play,
-the centrifugal force and the gyroscopic force. 
+\paragraph{Generalized Forces}
+The ballbot's inputs are modeled as two torques $\tau_x$ and $\tau_y$ which each
+affect both the rotation of the body angles and the position of the ball.
+The matrix that maps between this is 
+$$\mathcal{Q} = B_{generalized}*u = \bmat{0&-1/r \\ -1/r&0 \\ 0&1 \\ 1&0} \bmat{\tau_x \\ \tau_y}$$
 
-Since we are working with torques, we need the formula for the torque caused
-by the centrifugal force. This can be interpreted as a torque occurring at the
-center of mass of the combined system of the rider and wheel perpendicular to
-the body of the unicycle, that is $\tau_c = d_cF_cm_c\cos(\phi)$ where
-$d_c$ is the distance from the pivot to the center of mass, $F_c$ is the
-centrifugal force, $m_c$ is the total mass of the system. Additionally, note the
-$\cos(\phi)$ term, because the centrifugal force acts parallel to the global y
-axis regardless of the angle $\phi$ of the unicycle, it must be broken down into
-components that are cancelled by the unicycle's normal force and those which act
-as a net torque perpendicular to the axis of travel. 
+\paragraph{Equations of motion}
+This symbolic representation of the equations of motion can be symbolically solved to return
+a function $\ddot{q} = f(q, \dot{q})$. 
 
-Starting off with $d_c$, it can be found by treating the unicycle as a seesaw
-and finding the location at which the torques balance. This formula is defined
-in \ref{par:d_c derivation} and resolves to
-$d_c = \frac{m_rr + dm_r + m_wr}{m_w+m_r}$. Next, is
-$F_c$, which additional is defined in \ref{par:F_c derivation} to be
-$F_c = r_w \omega \dot{\theta} m_c$.
-These three formulas can be combined together to form
-$$ \tau_c = r_w \omega \dot{\theta} m_c d_c \cos(\phi)$$
-
-Finally, the gyroscopic torque can be calculated and, as detailed in
-\ref{par:t_g derivation}, its the formula is
-$\tau_g = I_{wz} \omega \dot{\theta} \cos(\phi)$
-
-This can now be stated as 
-$$\ddot{\phi} = \frac{\tau_{gravity} + \tau_2 + \tau_c + tau_{gyroscopic}}{I_{pivot}}$$
-
-\paragraph{Rotation $\omega$ and $\alpha$} 
-The omega and alpha terms are special as they are interlinked. We will address
-their derivations separately, resolving two separate equations, both dependent 
-on $\dot{\omega}$ and $\ddot{\alpha}$ and then use algebraic substitution. 
-Their derivations are explained in detail in the Appendix; however, here we 
-will place their full definitions, where the system determinant is defined as
-$\Delta = [ (m_w + m_r)r^2 + I_{wy} ] [ I_{wy} + m_r d^2 ] - ( m_r r d \cos \alpha )^2$.
-
-The explicit formula for wheel acceleration is:
-$$
-\dot{\omega} = \frac{ ( I_{wy} + m_r d^2 ) (m_r g d \sin \alpha) - (m_r r d \cos \alpha)(m_r g d \sin \alpha - \tau_1) }{ \Delta }
-$$
-
-The explicit formula for pitch acceleration is:
-$$
-\ddot{\alpha} = \frac{ [ (m_w + m_r)r^2 + I_{wy} ] (m_r g d \sin \alpha - \tau_1) - (m_r r d \cos \alpha)(m_r g d \sin \alpha) }{ \Delta }
-$$
-
-\paragraph{Final state equation}
-Now that each sub-equation has been derived and the dependencies substituted,
-the final non-linear state update vector $\dot{x}$ can be written.
-
-$$
-\dot{x} = \begin{bmatrix}
-  \dot{x} \\
-  \dot{y} \\
-  \dot{\theta} \\
-  \dot{\phi} \\
-  \omega \\
-  \dot{\alpha} \\
-  r (\dot{\omega} \cos\theta - \omega \dot{\theta} \sin\theta) \\
-  r (\dot{\omega} \sin\theta + \omega \dot{\theta} \cos\theta) \\
-  \dot{\omega}\sin\phi + \omega\dot{\phi}\cos\phi \\
-  \dfrac{ [ m_w r + m_r (r+d) ] (g\sin\phi + r \omega \dot{\theta} \cos\phi) - I_{wz} \omega \dot{\theta} \cos\phi + \tau_2 }
-    { m_w r^2 + m_r(r+d)^2 + I_{wy} } \\
-  \dfrac{ ( m_r d^2 ) (\tau_1) - (m_r r d \cos \alpha)(m_r g d \sin \alpha - \tau_1 + \tau_3) }
-    { [ (m_w + m_r)r^2 + I_{wy} ] [ m_r d^2 ] - ( m_r r d \cos \alpha )^2 } \\
-  \dfrac{ [ (m_w + m_r)r^2 + I_{wy} ] (m_r g d \sin \alpha - \tau_1 + \tau_3) - (m_r r d \cos \alpha)(\tau_1) }
-    { [ (m_w + m_r)r^2 + I_{wy} ] [ m_r d^2 ] - ( m_r r d \cos \alpha )^2 }
-\end{bmatrix}
-$$
-
-
-Some interesting things can be gleamed from this equation. Most notably the
-fact that $\tau_1$ and $\tau_3$ are highly coupled but not identical!
+Finally, the state update equation we sought $\dot{\state}$ can be calculated
+$$\dot{\state} = \bmat{\dot{q} \\ f(q, \dot{q})}$$

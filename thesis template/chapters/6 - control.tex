@@ -1,0 +1,66 @@
+\chapter{Control}
+
+The goal for this project was to create a demonstration of the ballbot moving
+in a figure eight pattern, while starting at some arbitrary position and with
+and observer, initialized to the zero state. Since the observer has already been
+defined, all that leaves is for the controller to be defined and for the 
+reference signal to be defined.
+
+A figure eight pattern requires a controller that creates a balance between
+position and angle. If the controller focuses too much on the position, the
+robot will move too quickly and fall over. On the other hand, if the controller
+focuses too much on angle, it won't trace out the correct path.
+
+\section{Definition of the reference function}
+
+A reference signal is function that evaluates to a desired state of the system.
+First, recall that the state vector is
+$\state = \bmat{x&y&\theta&\phi&\dot{x}&\dot{y}&\dot{\theta}&\dot{\phi}}^\top$. 
+Second, we can see, upon inspection that the only states which matter in a 
+figure eight pattern are the $x$ and $y$ states of the base of the robot. 
+
+In order to derive the equation for this path, one can first start with the 
+parametric form of a circle $(x, y) = (r * cos(\omega t), r*sin(\omega t))$ and
+what is a figure eight if not a circle where one component is twice the
+frequency of the other? This yeilds the final equation 
+$(x, y) = (r * cos(\omega t), 0,5*r*sin(2*\omega t))$
+
+Finally, this can be written in the form of a function in matlab to represent
+$$\bmat{
+    r * cos(\omega t) \\
+    0.5 * r * sin(2 * \omega t) \\
+    0 \\ 
+    0 \\
+    0 \\ 
+    0 \\
+    0 \\ 
+    0 \\
+}$$
+
+\section{Controller}
+
+In order to achieve this goal, we will use LQR and use gains that put a stronger
+weight on the $x$ and $y$ components in comparison to the other states, but 
+not have them be too large as to cause the robot to fall over.
+
+By trial and error, the gains we selected were
+$Q = 10 \cdot \text{diag}(10, 10, 1, 1, 1, 1, 1, 1)$ and $R = I_{2x2}$
+as they appeared to strike a nice balance between acceptable tracking of the 
+reference vector without the robot falling over.
+
+
+
+By using the built-in matlab function, I got a K matrix of
+$$K = \bmat{
+    0 & -3.1623 & 0 & 32.1665 & 0 & -4.2961 & 0 & 6.9921 \\
+    3.1623 & 0 & 32.1665 & 0 & 4.2961 & 0 & 6.9921 & 0
+}$$
+
+This is used in stoic state feedback with the system with the input vector $u$
+being calculated as 
+$$u = -K(\hat{\state} - r)$$
+
+\section{Results}
+
+
+results with a couple of graphs, do x and y position vs time

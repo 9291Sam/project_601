@@ -1,65 +1,84 @@
-\chapter{Environments}
+\chapter{Ballbot Simulation}
 
-Environments in LaTeX are used to apply specific formatting to part of the document\footnote{\url{https://www.overleaf.com/learn/latex/Environments}}.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Theorems}
-
-For Theorem environments, we use the \verb|amsthm| package. This allows us to define environments that are frequently used such as \verb|thm| for theorem, \verb|lem| for lemma, and so on. We can also use the \verb|thmtools| package to create boxed or shaded theorems for emphasis. Here are some examples.
-
-\begin{theorem}[A theorem]
-	\label{thm:big_result1}
-	This is how we state a theorem.
-\end{theorem}
-
-\begin{theoremshaded}[Shaded]
-	\label{thm:big_result2}
-	For emphasis, we can put it in a shaded box.
-\end{theoremshaded}
-
-\begin{theoremboxed}[Outlined]
-	\label{thm:big_result3}
-	Another way to create emphasis is with an outlined box.
-\end{theoremboxed}
-
-\begin{proof}
-We can write proofs using the \verb|proof| environment.
-\end{proof}
-
-The \verb|thmtools| package also provides \verb|restatable|, which is useful if you want to state the same result more than once (say, in the introduction and later in the paper), but don't want to give it a new label and equation numbers. See the documentation for more details\footnote{\url{https://ctan.math.illinois.edu/macros/latex/contrib/thmtools/doc/thmtools-manual.pdf}}.
+The following sections visually demonstrate the uncontrolled dynamics of the
+ballbot under various initial conditions.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Lists}
+\section{No Deviation}
+The following are graphs showing the ballbot stand perfectly still at its
+unstable equilibrium point, $\state = 0$. Both graphs are as expected as
+although the equilibrium point is unstable, no deviations are made to cause the
+ballbot to move from it. 
 
-Create bulleted lists using the \verb|itemize| environment. For example:
-\begin{itemize}
-	\item First item
-	\item Second item
-	\item Third item
-\end{itemize}
-Numbered lists are created using the \verb|enumerate| environment. For customization, we use the \verb|enumitem| package with the \verb|shortlabels| option. This allows us to write customized lists easily. For example,
-\bigskip
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.96\linewidth]{uncontrolled_xtheta_no_deviation.png}
+  \caption{Graph of the $x$ and $\theta$ coordinates of the ballbot at its equilibrium point}
+  \label{fig:uncontrolled_xtheta_no_deviation}
+\end{figure}
 
-\hfill
-\begin{minipage}{0.45\linewidth}
-\begin{verbatim}
-\begin{enumerate}[(i)]
-    \item first item \label{x}
-    \item second item \label{y}
-    \item third item \label{z}
-\end{enumerate}
-\end{verbatim}
-\end{minipage}
-\hfill produces \hfill
-\begin{minipage}{0.3\linewidth}
-\begin{enumerate}[(i)]
-	\item first item \label{x}
-	\item second item \label{y}
- 	\item third item \label{z}
-\end{enumerate}
-\end{minipage}
-\bigskip
 
-We can refer to items using \verb|\cref| as before. For example, the command \verb|\cref{x,y,z}| produces \cref{x,y,z}.
+\section{Theta Deviation}
+
+Figures \ref{fig:uncontrolled_x_theta_deviation} and
+\ref{fig:uncontrolled_theta_theta_deviation} represent the ballbot starting with 
+$\state = \bmat{0&0&0.00001&0&0&0&0&0}^\top$. These behave mostly as expected,
+with two things of note. First, is the slight positive $x$ drive in 
+\ref{fig:uncontrolled_x_theta_deviation}, we assume this to be the result of
+simulation inaccuracy. Second, is the increasing angle of theta, which is odd
+but not a problem as we are not attempting to control the system. A more
+rigorous simulation would have something in place to prevent this. 
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.73125\linewidth]{uncontrolled_x_theta_deviation.png}
+  \caption{Graph of the $x$ coordinate of the ballbot starting near its equilibrium state with a slight deviation to $\theta$}
+  \label{fig:uncontrolled_x_theta_deviation}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.73125\linewidth]{uncontrolled_theta_theta_deviation.png}
+  \caption{Graph of the $\theta$ coordinate of the ballbot starting near its equilibrium state with a slight deviation to $\theta$}
+  \label{fig:uncontrolled_theta_theta_deviation}
+\end{figure}
+
+
+\section{Theta and Phi Deviation}
+
+Figures \ref{fig:uncontrolled_x_both_deviation}, 
+\ref{fig:uncontrolled_y_both_deviation}, 
+\ref{fig:uncontrolled_theta_both_deviation}, and
+\ref{fig:uncontrolled_dottheta_no_deviation} start with 
+$\state = \bmat{0&0&0.00001&0.0001&0&0&0&0}^\top$. At these initial conditions
+we can start to notice sone chaotic behavior arising from the interaction
+between the nonlinear pendulum force and the linear kickback of the wheel from
+the falling body.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.74\linewidth]{uncontrolled_x_both_deviation.png}
+  \caption{Graph of the $x$ coordinate of the ballbot starting near its equilibrium state with a slight deviation to $\theta$ and $\phi$}
+  \label{fig:uncontrolled_x_both_deviation}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.74\linewidth]{uncontrolled_y_both_deviation.png}
+  \caption{Graph of the $y$ coordinate of the ballbot starting near its equilibrium state with a slight deviation to $\theta$ and $\phi$}
+  \label{fig:uncontrolled_y_both_deviation}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.74\linewidth]{uncontrolled_theta_both_deviation.png}
+  \caption{Graph of the $\theta$ coordinate of the ballbot starting near its equilibrium state with a slight deviation to $\theta$ and $\phi$}
+  \label{fig:uncontrolled_theta_both_deviation}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.74\linewidth]{uncontrolled_dottheta_no_deviation.png}
+  \caption{Graph of the $\dot{\theta}$ coordinate of the ballbot starting near its equilibrium state with a slight deviation to $\theta$ and $\phi$}
+  \label{fig:uncontrolled_dottheta_no_deviation}
+\end{figure}
